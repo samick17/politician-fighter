@@ -1,0 +1,8 @@
+@font-face {
+  font-family: PingFang-UltraLight;
+  src: url("../media/fonts/STHeitiUITC-UltraLight.woff2");
+}
+
+body {
+  background-color: #000000;
+}

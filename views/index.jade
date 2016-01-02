@@ -1,0 +1,12 @@
+extends layout
+
+block content
+  script.
+    var game = new Phaser.Game(1280, 1024, Phaser.AUTO);
+    game.state.add("Boot", Boot);
+    game.state.add("Lobby", Lobby);
+    game.state.add("GameRoom", GameRoom);
+    game.state.add("CreateRoom", CreateRoom);
+    game.state.add("QuickJoin", QuickJoin);
+    game.state.add("Arena", Arena);
+    game.state.start("Boot");
