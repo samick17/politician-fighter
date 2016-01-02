@@ -15,6 +15,6 @@ Boot.prototype = {
     game.scale.pageAlignHorizontally = true;
     game.scale.pageAlignVertically = true;
 
-    game.state.start("GameRoom");
+    game.state.start("Arena");
   }
 };

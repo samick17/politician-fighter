@@ -2,7 +2,10 @@ var Arena = function(game) {};
 
 (function() {
 
+  const BaseLineHeight = 32;
+
   var character1;
+  
 
   function createCharacter(resName) {
     var characterGroup = game.add.group();
@@ -13,7 +16,6 @@ var Arena = function(game) {};
     characterGroup.scale.setTo(scale, scale);
     characterGroup.add(characterSpr);
     game.physics.enable(characterSpr, Phaser.Physics.ARCADE);
-    //characterSpr.body.collideWorldBounds = true;
     characterSpr.pivot.x = characterSpr.width/2;
     characterSpr.pivot.y = characterSpr.height/2;
     characterSpr.body.setSize(characterSpr.width*widthScale, characterSpr.height*scale, characterSpr.width*offsetXScale, 0);
@@ -24,17 +26,11 @@ var Arena = function(game) {};
       this.walkVelocity = 5;
       this.velocity = this.walkVelocity;
       this.runVelocity = 9;
+      this.baseLine = 0;
     };
     Character.prototype.setPos = function(x, y) {
       this.spr.x = x;
       this.spr.y = y;
-      return this;
-    };
-    Character.prototype.attachLifeBar = function(lifeBar) {
-      this.spr.add(lifeBar.getSpr());
-      lifeBar.target = this;
-      this.lifeBar = lifeBar;
-      this.lifeBar.update();
       return this;
     };
     Character.prototype.getLifeRate = function() {
@@ -42,7 +38,6 @@ var Arena = function(game) {};
     };
     Character.prototype.applyDamage = function(dmg) {
       this.life = MathUtils.clamp(this.life+dmg, 0, this.maxLife);
-      this.lifeBar.update();
       return this;
     };
     Character.prototype.getSprBody = function() {
@@ -59,19 +54,14 @@ var Arena = function(game) {};
     Character.prototype.moveLeft = function() {
       this.turnLeft();
       this.spr.x -= this.velocity;
-      this.lifeBar.update();
-      //characterSpr.body.velocity.setTo(-this.velocity, characterSpr.body.velocity.y);
     };
     Character.prototype.moveRight = function() {
       this.turnRight();
       this.spr.x += this.velocity;
-      this.lifeBar.update();
-      //characterSpr.body.velocity.setTo(this.velocity, characterSpr.body.velocity.y);
     };
     Character.prototype.jump = function() {
       if(this.isJump)
         return;
-      this.baseLine = characterSpr.y;
       this.turnRight();
       characterSpr.body.velocity.setTo(characterSpr.body.velocity.x, -180);
       this.isJump = true;
@@ -79,16 +69,23 @@ var Arena = function(game) {};
     Character.prototype.update = function() {
       if(this.isJump) {
         //ground
-        if(characterSpr.y > this.baseLine) {
+        if(characterSpr.y > this.baseLine*BaseLineHeight) {
           this.grounded();
+        }
+      }
+      else {
+        if(characterSpr.y > this.baseLine*BaseLineHeight) {
+          characterSpr.y = this.baseLine*BaseLineHeight
         }
       }
     },
     Character.prototype.grounded = function() {
-      this.isJump = false;
+      if(!this.isJump)
+        return;
       this.applyGravity(0);
       characterSpr.body.velocity.setTo(characterSpr.body.velocity.x, 0);
-      characterSpr.y = this.baseLine;
+      characterSpr.y = this.baseLine*BaseLineHeight;
+      this.isJump = false;
     },
     Character.prototype.runMode = function() {
       this.velocity = this.runVelocity;
@@ -128,7 +125,7 @@ var Arena = function(game) {};
       },
       update: function() {
         this.setRate(this.target.getLifeRate());
-        this.setPos(-this.target.spr.width/2, -this.target.spr.height/2-this.getHeight());
+        //this.setPos(-this.target.spr.width/2, -this.target.spr.height/2-this.getHeight());
       }
     };
   }
@@ -150,8 +147,7 @@ var Arena = function(game) {};
       bg2.scale.setTo(2, 0.2);
       bg2.y = 279;
       bg2.tileScale.x = 0.2;
-      var lifeBar = createLifeBar().setPos(100,100).setRate(0.6);
-      character1 = createCharacter('firzen').setPos(100, game.height-500).attachLifeBar(lifeBar);
+      character1 = createCharacter('firzen').setPos(100, game.height-500);
       game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR).onDown.add(()=>{
         character1.jump();
         character1.applyGravity(480);
@@ -169,7 +165,6 @@ var Arena = function(game) {};
       character1.update();
     },
     render: function() {
-      game.debug.body(character1.getSprBody(), 'rgba(255,0,0,0,1)', false);
     }
   }
 }());

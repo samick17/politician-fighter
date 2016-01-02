@@ -6,10 +6,11 @@ var GameRoom = function(game) {};
   const CHARACTER_MENU_PADDING = 0, CHARACTER_BLOCK_WIDTH = 320, CHARACTER_BLOCK_CONTENT_WIDTH = 320, CHARACTER_BLOCK_HEIGHT = 512, CHARACTER_BLOCK_CONTENT_HEIGHT = 512, CHARACTER_BLOCK_NAME_HEIGHT = 48;
 
   var candidateCharacters = [
-    {name: 'SungLa', avatarPath: '/media/arena/character/sung/sung.jpg'},
-    {name: 'Tsai', avatarPath: '/media/arena/character/tsai/tsai.jpg'},
-    {name: 'KerP', avatarPath: '/media/arena/character/kp/kp.jpg'},
-    {name: 'DDL', avatarPath: '/media/arena/character/ddl/ddl.jpg'}
+    {name: 'SungLa', avatarPath: '/media/arena/character/sung/sung.png'},
+    {name: 'Tsai', avatarPath: '/media/arena/character/tsai/tsai.png'},
+    {name: 'KerP', avatarPath: '/media/arena/character/kp/kp.png'},
+    {name: 'DDL', avatarPath: '/media/arena/character/ddl/ddl.png'},
+    {name: 'EJMa', avatarPath: '/media/arena/character/ejma/ejma.png'},
   ];
 
   var characters = [
@@ -23,6 +24,10 @@ var GameRoom = function(game) {};
 
   var character = characters[3];
 
+
+  //update selected character:
+  //characters[1].updateSelectedCharacter(MathUtils.next(characters[1].selectedCharacter, candidateCharacters.length));
+
   function drawCharacterBlock(ch, i, focus) {
     var x = CHARACTER_MENU_PADDING+CHARACTER_BLOCK_WIDTH*(i%4);
     var y = CHARACTER_MENU_PADDING+CHARACTER_BLOCK_HEIGHT*parseInt(i/4);
@@ -33,7 +38,6 @@ var GameRoom = function(game) {};
       if(menuItemAvatar)
         menuItemAvatar.destroy();
       menuItemAvatar = game.add.image(x, y, candidateCharacters[ch.selectedCharacter].name);
-      menuItemAvatar.scale.setTo(0.35242, 0.35242);
       game.world.bringToTop(highLightGroup);
     };
     ch.updateSelectedCharacter(ch.selectedCharacter);
@@ -78,14 +82,13 @@ var GameRoom = function(game) {};
         drawCharacterCrossedBlock(i);
       }
       game.input.keyboard.addKey(Phaser.Keyboard.LEFT).onDown.add(()=>{
-        //character.selectedCharacter  = Math.abs((character.selectedCharacter-1)%candidateCharacters.length);
         character.updateSelectedCharacter(MathUtils.previous(character.selectedCharacter, candidateCharacters.length));//Math.abs((character.selectedCharacter-1)%candidateCharacters.length));
       }, this, 0);
       game.input.keyboard.addKey(Phaser.Keyboard.RIGHT).onDown.add(()=>{
         character.updateSelectedCharacter(MathUtils.next(character.selectedCharacter, candidateCharacters.length));
       }, this, 0);
       game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR).onDown.add(()=>{
-        game.state.start("Arena");
+        //game.state.start("Arena");
       }, this, 0);
     },
     update: function() {
