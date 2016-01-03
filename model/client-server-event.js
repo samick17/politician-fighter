@@ -1,6 +1,8 @@
 var ClientServerEvent = function() {
   return {
-    GameStart: 'gs'
+    GameStart: 'gs',
+    CreateGameRoom: 'cgr',
+    QuickJoin: 'qj'
   };
 }();
 

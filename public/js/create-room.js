@@ -9,6 +9,7 @@ var CreateRoom = function(game) {};
   const MemberCounts = [2,3,4,5,6];
   var menu = [];
   var selectedMenuIndex = 0;
+  var highLightGroup;
   var selectedMapIndex = -1, selectedMemberCountIndex = -1;
 
   var gameParams = {
@@ -79,8 +80,8 @@ var CreateRoom = function(game) {};
       id: 2,
       name: MENU_START_TEXT,
       onMenuSelect: (item) => {
-        Client.send(ClientServerEvent.GameStart, gameParams);
-      },
+        Client.send(ClientServerEvent.CreateGameRoom, gameParams);
+      }
     }
   ];
 
@@ -90,8 +91,10 @@ var CreateRoom = function(game) {};
       mItem.onMenuUnhover(mItem);
     selectedMenuIndex = MathUtils.clamp(selectedMenuIndex-1, 0, menu.length-1);
     mItem = menuModel[selectedMenuIndex];
-    if(mItem.onMenuHover)
+    if(mItem.onMenuHover) {
       mItem.onMenuHover(mItem);
+    }
+    mItem.highlight();
   }
   function moveMenuItemDown() {
     var mItem = menuModel[selectedMenuIndex];
@@ -99,27 +102,51 @@ var CreateRoom = function(game) {};
       mItem.onMenuUnhover(mItem);
     selectedMenuIndex = MathUtils.clamp(selectedMenuIndex+1, 0, menu.length-1);
     mItem = menuModel[selectedMenuIndex];
-    if(mItem.onMenuHover)
+    if(mItem.onMenuHover) {
       mItem.onMenuHover(mItem);
+    }
+    mItem.highlight();
   }
   function onMenuSelect() {
     var mItem = menuModel[selectedMenuIndex];
     mItem.onMenuSelect(mItem);
   }
 
+  function createHighlightMenuItem() {
+    var highLightGroup = game.add.group();
+    var highlightImg = game.add.image(0, 0, 'highlight');
+    highlightImg.scale.setTo(1, 2);
+    highlightImg.alpha = 0.4;
+    highLightGroup.add(highlightImg);
+    highLightGroup.setPos = (x, y) => {
+      highlightImg.x = x;
+      highlightImg.y = y;
+    };
+    return highLightGroup;
+  }
+
+  function drawMenuItem(mi, i, focus) {
+    var x = game.width/2;
+    var y = game.height/2-200+40*i;
+    mi.menuItem.setTextBounds(x, y, 120, 40);
+    mi.highlight = function() {
+      highLightGroup.setPos(x, y);
+    };
+  }
+
   CreateRoom.prototype = {
     preload: function() {
     },
     create: function() {
-      var centerX = game.width/2;
-      var centerY = game.height/2;
+      highLightGroup = createHighlightMenuItem();
       var style = { font: "bold 32px Arial", fill: "#fff", boundsAlignH: "center", boundsAlignV: "middle" };
       for(var i in menuModel) {
         var mModel = menuModel[i];
-        var menuItem = game.add.text(0, 0, mModel.name, style);
-        menuItem.setTextBounds(centerX, centerY-200+40*i, 120, 40);
-        menu[mModel.id] = menuItem;
+        mModel.menuItem = game.add.text(0, 0, mModel.name, style);
+        menu.push(mModel.menuItem);
+        drawMenuItem(mModel, i, i == selectedMenuIndex);
       }
+      menuModel[selectedMenuIndex].highlight();
       keyMenuUp = game.input.keyboard.addKey(Phaser.Keyboard.UP);
       keyMenuUp.onDown.add(moveMenuItemUp, this);
       keyMenuDown = game.input.keyboard.addKey(Phaser.Keyboard.DOWN);
@@ -132,7 +159,7 @@ var CreateRoom = function(game) {};
     update: function() {
     },
     render: function() {
-      game.debug.geom(menu[selectedMenuIndex].textBounds);
+      //game.debug.geom(menu[selectedMenuIndex].textBounds);
     }
   }
 }());
