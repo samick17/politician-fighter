@@ -7,13 +7,11 @@ function GameClient(socket) {
 }
 
 GameClient.prototype.joinRoom = function(room) {
-  var client = this;
-  client.gameRoom = room;
-  client.socket.emit(ServerClientEvent.UpdateProfile, client.toJson());
+  this.gameRoom = room;
+  this.socket.emit(ServerClientEvent.UpdateProfile, this.toJson());
 };
 
 GameClient.prototype.leaveRoom = function(room) {
-  this.gameRoom.broadcast(ServerClientEvent.OnLeaveRoom, {id: this.socket.id});
   this.gameRoom = null;
 };
 
@@ -26,7 +24,7 @@ GameClient.prototype.disconnect = function() {
 
 GameClient.prototype.toJson = function() {
   var jsonModel = {
-    id: this.socket.id,
+    id: this.id,
     characterIndex: this.characterIndex
   };
   jsonModel.roomId = this.gameRoom?this.gameRoom.id:undefined;

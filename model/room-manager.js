@@ -14,7 +14,6 @@ RoomManager.prototype.addRoom = function(params, client) {
   var gameRoom = new GameRoom(params, this);
   this.rooms[gameRoom.id] = gameRoom;
   this.emit(OpType.add, gameRoom);
-  //gameRoom.broadcast(ServerClientEvent.OnRoomCreated, gameRoom.toJson());
   gameRoom.addClient(client);
 };
 

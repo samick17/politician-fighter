@@ -29,7 +29,8 @@ var GameRoom = function(game) {};
       if(menuItemAvatar)
         menuItemAvatar.destroy();
       menuItemAvatar = game.add.image(x, y, appMgr.candidateCharacters[ch.characterIndex].name);
-      game.world.bringToTop(highLightGroup);
+      if(highLightGroup)
+        game.world.bringToTop(highLightGroup);
     };
     if(focus) {
       highLightGroup = game.add.group();
@@ -69,18 +70,16 @@ var GameRoom = function(game) {};
       gameRoom.on('addClient', function(client) {
         var idx = indexOfArrayProperty(gameRoom.members, 'id', client.id);
         drawCharacterBlock(client, idx, false);
-        //console.log('add client')
       });
       var candidateCharacters = appMgr.candidateCharacters;
       var roomMembers = gameRoom.clients;
       var character = roomMembers[appMgr.getClient().id];
       graphics = game.add.graphics(0,0);
-      //console.log(gameRoom.members);
       for(var i in gameRoom.members) {
         var member = gameRoom.members[i];
         var client = appMgr.getClientById(member.id);
         console.log(client)
-        drawCharacterBlock(member, i, member.id === appMgr.getClient().id);
+        drawCharacterBlock(client, i, client.id === appMgr.getClient().id);
       }
       for(var i = gameRoom.members.length; i < MAX_RENDERED_MEMBER_COUNT; i++) {
         drawCharacterCrossedBlock(i);

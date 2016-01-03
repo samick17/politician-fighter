@@ -11,6 +11,7 @@ function createSocketServer(app) {
   var clientMgr = new ClientManager();
 
   roomMgr.on(OpType.add, function(room) {
+    console.log('add room event');
     io.emit(ServerClientEvent.OnRoomCreated, room.toJson());
   });
   roomMgr.on(OpType.update, function(room) {

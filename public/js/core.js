@@ -59,6 +59,9 @@ IEventable.prototype.emit = function(name, arg) {
 
 function ClientModel(data) {
   IEventable.call(this);
+  for(var i in data) {
+    this[i] = data[i];
+  }
 }
 inherits(IEventable, ClientModel);
 
@@ -151,11 +154,14 @@ var appMgr = function() {
       delete rooms[roomId];
     },
     joinRoom: function(data) {
-      var client = clients[data.id];
+      var clientData = data.client;
+      var client = clients[clientData.id];
       if(client) {
         client.update(data);
-        var room = rooms[client.roomId];
+        var roomData = data.room;
+        var room = rooms[roomData.id];
         if(room) {
+          room.update(roomData);
           room.addClient(client);
         }
       }

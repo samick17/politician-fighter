@@ -3,9 +3,9 @@ var Lobby = function(game) {};
 (function() {
 
   var menuModel = [
-    {name: '創建房間', onMenuSelect: () => {game.state.start('CreateRoom');}},
-    {name: '快速加入', onMenuSelect: () => {Client.send(ClientServerEvent.QuickJoin)}},
-    {name: '按鍵設定', onMenuSelect: () => {console.log('keyboard settings');}}
+  {name: '創建房間', onMenuSelect: () => {game.state.start('CreateRoom');}},
+  {name: '快速加入', onMenuSelect: () => {Client.send(ClientServerEvent.QuickJoin)}},
+  {name: '按鍵設定', onMenuSelect: () => {console.log('keyboard settings');}}
   ];
   var menu = [];
   var selectedMenuIndex = 0;
@@ -70,7 +70,9 @@ var Lobby = function(game) {};
     appMgr.setClientId(data.id);
   });
   Client.on(ServerClientEvent.UpdateProfile, function(data) {
-    appMgr.getClient().update(data);
+    var client = appMgr.getClientById(data.id);
+    if(client)
+      client.update(data);
   });
   Client.on(ServerClientEvent.AllRooms, function(data) {
     appMgr.setAllRooms(data);
@@ -84,7 +86,7 @@ var Lobby = function(game) {};
   });
   Client.on(ServerClientEvent.OnJoinRoom, (data) => {
     appMgr.joinRoom(data);
-    if(data.id === appMgr.getClient().id) {
+    if(data.client.id === appMgr.getClient().id) {
       game.state.start('GameRoom');
     }
   });

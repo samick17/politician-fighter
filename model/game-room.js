@@ -14,14 +14,14 @@ function GameRoom(params, roomMgr) {
 GameRoom.prototype.addClient = function(client) {
   this.clients[client.id] = client;
   client.joinRoom(this);
-  this.broadcast(ServerClientEvent.OnRoomCreated, this.toJson());
-  this.broadcast(ServerClientEvent.OnJoinRoom, client.toJson());
+  this.broadcast(ServerClientEvent.OnJoinRoom, {client: client.toJson(), room: this.toJson()});
 }
 
 GameRoom.prototype.removeClient = function(client) {
   var client = this.clients[client.id];
   if(client) {
-    client.leaveRoom(this.gameRoom);
+    client.leaveRoom(this);
+    this.broadcast(ServerClientEvent.OnLeaveRoom, client.id);
     delete this.clients[client.id];
     if(Object.keys(this.clients).length === 0) {
       this.breakup();
@@ -59,6 +59,6 @@ GameRoom.prototype.toJson = function() {
     maxMember: this.maxMember,
     members: members
   };
-}
+};
 
 module.exports = GameRoom;
