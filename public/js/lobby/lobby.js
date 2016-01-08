@@ -61,10 +61,13 @@ var Lobby = function(game) {};
 
   Client.on(ServerClientEvent.AllClients, function(data) {
     appMgr.setAllClients(data);
-    console.log(data);
   });
   Client.on(ServerClientEvent.OnClientConnect, function(data) {
     appMgr.addClient(data);
+  });
+  Client.on(ServerClientEvent.OnClientDisconnect, function(data) {
+    appMgr.removeClientById(data);
+    appMgr.logClients();
   });
   Client.on(ServerClientEvent.Profile, function(data) {
     appMgr.setClientId(data.id);
@@ -85,8 +88,9 @@ var Lobby = function(game) {};
     appMgr.addRoom(data);
   });
   Client.on(ServerClientEvent.OnJoinRoom, (data) => {
-    appMgr.joinRoom(data);
+    appMgr.joinRoom(data.client, data.room, data.idx);
     if(data.client.id === appMgr.getClient().id) {
+      
       game.state.start('GameRoom');
     }
   });

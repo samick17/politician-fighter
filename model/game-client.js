@@ -4,11 +4,11 @@ function GameClient(socket) {
   this.id = socket.id;
   this.socket = socket;
   this.characterIndex = 0;
+  this.isLockCharacter = false;
 }
 
 GameClient.prototype.joinRoom = function(room) {
   this.gameRoom = room;
-  this.socket.emit(ServerClientEvent.UpdateProfile, this.toJson());
 };
 
 GameClient.prototype.leaveRoom = function(room) {
@@ -22,10 +22,25 @@ GameClient.prototype.disconnect = function() {
   }
 };
 
+GameClient.prototype.selectCharacter = function(index) {
+  if(this.isLockCharacter)
+    return;
+  this.characterIndex = index;
+  this.gameRoom.broadcast(ServerClientEvent.SelectCharacter, {client: this.toJson(), index: index});
+};
+
+GameClient.prototype.ensureSelectCharacter = function() {
+  if(this.isLockCharacter)
+    return;
+  this.isLockCharacter = true;
+  this.gameRoom.broadcast(ServerClientEvent.EnsureSelectCharacter, {client: this.toJson()});
+};
+
 GameClient.prototype.toJson = function() {
   var jsonModel = {
     id: this.id,
-    characterIndex: this.characterIndex
+    characterIndex: this.characterIndex,
+    isLockCharacter: this.isLockCharacter
   };
   jsonModel.roomId = this.gameRoom?this.gameRoom.id:undefined;
   return jsonModel;

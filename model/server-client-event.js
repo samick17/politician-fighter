@@ -2,14 +2,18 @@ var ServerClientEvent = function() {
   return {
     AllClients: 'ac',
     OnClientConnect: 'oclntcon',
+    OnClientDisconnect: 'oclntdcon',
     Profile: 'pf',
-    UpdateProfile: 'upf',
     AllRooms: 'arm',
     LoadCharacters: 'lc',
     OnRoomCreated: 'orc',
     OnRoomRemoved: 'orrd',
-    OnJoinRoom: 'ojr',
-    OnLeaveRoom: 'olr'
+    OnJoinRoom: 'ojr',//client-self join room
+    OnLeaveRoom: 'olr',//another client leave room
+    OnLoadEnd: 'oled',//load game data completed
+    SelectCharacter: 'sct',
+    EnsureSelectCharacter: 'esct',
+    RefreshRoomMembers: 'rrms'
   };
 }();
 

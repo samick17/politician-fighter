@@ -8,6 +8,7 @@ var CharacterLoader = function() {
     {name: 'KerP', avatarPath: '/media/arena/character/kp/kp.png'},
     {name: 'DDL', avatarPath: '/media/arena/character/ddl/ddl.png'},
     {name: 'EJMa', avatarPath: '/media/arena/character/ejma/ejma.png'},
+    {name: 'Lien', avatarPath: '/media/arena/character/lien/lien.png'},
   ];
 
   return {
