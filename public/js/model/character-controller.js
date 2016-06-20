@@ -13,7 +13,8 @@ function CharacterController(character, aoFactory) {
 
   charCtrl.character.on('skill', (skill) => {
     charCtrl.spawnSkill();
-    charCtrl.speak(charCtrl.character.characterSkillData[skill].name);
+    var skillData = charCtrl.character.characterSkillData[skill];
+    charCtrl.castSkill(skillData);
   });
 }
 
@@ -125,6 +126,14 @@ CharacterController.prototype.update = function() {
   if(game.time.now > this.inputTimeout) {
     this.currentInput = [];
   }
+};
+
+CharacterController.prototype.castSkill = function(skillData) {
+  var charCtrl = this;
+  console.log('asdasd')
+  charCtrl.speak(skillData.name);
+  var charObj = charCtrl.character;
+  charObj.castSkill(skillData);
 };
 
 CharacterController.prototype.speak = function(text) {

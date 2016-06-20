@@ -7,7 +7,8 @@ var AudioResource = function() {
     'run2': {path: 'media/audio/004.wav' },
     'punchNone1': {path: 'media/audio/007.wav' },
     'punchNone2': {path: 'media/audio/008.wav' },
-    'jump': {path: 'media/audio/017.wav' }
+    'jump': {path: 'media/audio/017.wav' },
+    'lie': {path: 'media/audio/overmydeadbody.ogg'}
   };
 
   return res;

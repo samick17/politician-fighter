@@ -14,6 +14,7 @@ module.exports = {
     {name: 'attack0', frames: [10,11], fps: 10, repeat: false},
     {name: 'attack1', frames: [12,13], fps: 10, repeat: false},
     {name: 'thresh', frames: [58,59,69], fps: 10, repeat: true},
-    {name: 'defense', frames: [56], fps: 10, repeat: false}
+    {name: 'defense', frames: [56], fps: 10, repeat: false},
+    {name: 'lie', frames: [35,34], fps: 10, repeat: false}
   ]
 };

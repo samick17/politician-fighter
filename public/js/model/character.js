@@ -1,16 +1,23 @@
 const VMotionState = {UP: 0, DOWN: 1, NONE: 2};
 const HMotionState = {LEFT: 0, RIGHT: 1, NONE: 2};
 const MOVE_VERTICAL_TIME = 5;
-const CHARACTER_ANIM_STATE = {IDLE: 0, WALK: 1, RUN: 2, STRETCH: 3, STRETCH_GROUNDED: 4, JUMP: 5, THRESH: 6, DEFENSE: 7};
+const CHARACTER_ANIM_STATE = {IDLE: 0, WALK: 1, RUN: 2, STRETCH: 3, STRETCH_GROUNDED: 4, JUMP: 5, THRESH: 6, DEFENSE: 7, CASTING: 8};
+const DIRECTION = {LEFT: 0, RIGHT: 1};
 
-function Character(spr, animDataArr, audioDataArr, baseLine) {
+function Character(spr, animDataArr, audioDataArr, baseLine, gameMgr) {
   IEventable.call(this);
   var charObj = this;
+  charObj.id = genId();
+  charObj.hp = 20;
+  charObj.maxHp = 50;
   charObj.spr = spr;
   charObj.baseLine = baseLine;
+  charObj.gameMgr = gameMgr;
   charObj.attackAudios = ['punchNone1', 'punchNone2'];
   charObj.runAudios = ['run1', 'run2'];
   charObj.punchAudios = ['punch1'];
+  charObj.lieAudio = ['lie'];
+  charObj.punches = [];
   for(var i in animDataArr) {
     var animData = animDataArr[i];
     var anim = charObj.spr.animations.add(animData.name, animData.frames, animData.fps, animData.repeat);
@@ -40,6 +47,7 @@ function Character(spr, animDataArr, audioDataArr, baseLine) {
   this.nextJump = Number.NEGATIVE_INFINITY;
   this.threshTime = 1.2;
   //
+  charObj.animState = CHARACTER_ANIM_STATE.IDLE;
   charObj.attackComboIndex = 0;
   charObj.isRun = false;
   charObj.isJumping = false;
@@ -48,9 +56,10 @@ function Character(spr, animDataArr, audioDataArr, baseLine) {
   charObj.velocity = 5;
   charObj.vMotionState = VMotionState.NONE;
   charObj.hMotionState = HMotionState.NONE;
+  charObj.turnRight();
   charObj.characterSkillData = {
     'lrr': {
-      name: '發明無薪假的人可以得諾貝爾獎!'
+      name: '發明無薪假的人可以得諾貝爾獎!',
     },
     'rll': {
       name: '我一定做好做滿'
@@ -63,6 +72,11 @@ function Character(spr, animDataArr, audioDataArr, baseLine) {
     },
     'dja': {
       name: '震怒丸~'
+    },
+    'dba': {
+      name: 'Over my dead body!',
+      anim: 'lie',
+      audio: charObj.lieAudio[0]
     }
   };
   charObj.skillGenerator = {
@@ -80,6 +94,9 @@ function Character(spr, animDataArr, audioDataArr, baseLine) {
     },
     'dja': function() {
       charObj.emit('skill', 'dja');
+    },
+    'dba': function() {
+      charObj.emit('skill', 'dba');
     }
   };
 }
@@ -92,6 +109,10 @@ Character.prototype.onAnimStarted = function(spr, anim) {
 Character.prototype.stopMoveHorizontal = function() {
   if(this.isJump() || (this.isRun && (!this.isArchieveRight() && !this.isArchieveLeft())))
     return;
+  this.doStopMoveHorizontal();
+};
+
+Character.prototype.doStopMoveHorizontal = function() {
   this.stopRun();
   this.nextMoveUp = Number.NEGATIVE_INFINITY;
   this.nextMoveDown = Number.NEGATIVE_INFINITY;
@@ -109,10 +130,23 @@ Character.prototype.stopMoveVertical = function() {
   if(this.hMotionState === HMotionState.NONE)
     this.animState = CHARACTER_ANIM_STATE.IDLE;
 };
-
+Character.prototype.isFaceL = function() {
+  return this.dir == DIRECTION.LEFT;
+};
+Character.prototype.getCenter = function() {
+  return {
+    x: this.spr.x-this.spr.pivot.x,
+    y: this.spr.y-this.spr.pivot.y
+  };
+}
 Character.prototype.attack = function() {
+  var charObj = this;
+  var charSpr = charObj.spr;
   var ndx = game.rnd.integerInRange(0, this.attackAudios.length-1);
   this.audios[this.attackAudios[ndx]].play();
+  this.gameMgr.punch(this);
+  charObj.animState = CHARACTER_ANIM_STATE.ATTACK;
+  charSpr.animations.play('attack'+this.attackComboIndex);
 };
 
 Character.prototype.punch = function() {
@@ -145,21 +179,24 @@ Character.prototype.stopRunAudio = function() {
 };
 
 Character.prototype.turnLeft = function() {
+  var charObj = this;
   var charSpr = this.spr;
   charSpr.scale.setTo(-2, 2);
-  charSpr.body.setSize(-charSpr.width/2, charSpr.height/2, charSpr.width, 0);
+  charObj.dir = DIRECTION.LEFT;
+  this.emit(CharacterEvent.turnLeft);
 };
 Character.prototype.turnRight = function() {
+  var charObj = this;
   var charSpr = this.spr;
   charSpr.scale.setTo(2, 2);
-  charSpr.body.setSize(-charSpr.width/2, charSpr.height/2, charSpr.width, 0);
+  charObj.dir = DIRECTION.RIGHT;
+  this.emit(CharacterEvent.turnRight);
 };
 Character.prototype.canJump = function() {
   return this.animState != CHARACTER_ANIM_STATE.STRETCH && this.animState != CHARACTER_ANIM_STATE.JUMP && this.animState != CHARACTER_ANIM_STATE.STRETCH_GROUNDED;
 };
 Character.prototype.stopThresh = function() {
   var charObj = this;
-  //charObj.stopRun();
   charObj.stopMoveHorizontal();
 };
 Character.prototype.thresh = function() {
@@ -174,9 +211,9 @@ Character.prototype.requestJump = function() {
     this.thresh();
   }
   else if(this.canJump() && game.time.now > this.nextJump) {
-    var anim = charSpr.animations.play('stretch');
-    this.animState = CHARACTER_ANIM_STATE.STRETCH;
     this.stopRun();
+    this.animState = CHARACTER_ANIM_STATE.STRETCH;
+    var anim = charSpr.animations.play('stretch');
     this.isJumping = true;
   }
 };
@@ -184,7 +221,7 @@ Character.prototype.doJump = function() {
   var charSpr = this.spr;
   charSpr.body.velocity.setTo(charSpr.body.velocity.x, -400);
   charSpr.body.gravity.set(0, 900);
-  nextJump = game.time.now + 900;
+  this.nextJump = game.time.now + 900;
   this.animState = CHARACTER_ANIM_STATE.JUMP;
   charSpr.animations.play('jump');
 };
@@ -205,6 +242,13 @@ Character.prototype.requestMoveUp = function() {
     if(this.spr.body.y > this.baseLine*ArenaSettings.BaseLineHeight)
       this.spr.body.y -= game.time.elapsed/MOVE_VERTICAL_TIME*ArenaSettings.BaseLineHeight;
   }
+};
+Character.prototype.applyDamage = function(dmg) {
+  console.log('damage: '+dmg);
+  this.hp -= dmg;
+  if(this.hp < 0)
+    this.hp = 0;
+  this.emit(CharacterEvent.hurt);
 };
 Character.prototype.moveUp = function() {
   if (this.canMoveUp()) {
@@ -307,8 +351,7 @@ Character.prototype.requestAttack = function() {
     charObj.stopRun();
     charObj.stopMoveHorizontal();
   }
-  charObj.animState = CHARACTER_ANIM_STATE.ATTACK;
-  charSpr.animations.play('attack'+this.attackComboIndex);
+  this.attack();
   //this.attackComboIndex = (this.attackComboIndex+1);
   //console.log('asdsd');
 };
@@ -367,9 +410,25 @@ Character.prototype.update = function() {
     case CHARACTER_ANIM_STATE.DEFENSE:
     charSpr.animations.play('defense');
     break;
+    case CHARACTER_ANIM_STATE.CASTING:
+    //if(charSpr.nextCast)
+    //charSpr.animations.play('defense');
+    break;
   }
   if((charObj.isJump()) && charSpr.body.y > charObj.baseLine * ArenaSettings.BaseLineHeight) {
     charObj.grounded();
+  }
+};
+
+Character.prototype.castSkill = function(skillData) {
+  var charObj = this;
+  var charSpr = charObj.spr;
+  charObj.doStopMoveHorizontal();
+  if(skillData.anim) {
+    charSpr.animations.play(skillData.anim);
+    charObj.animState = CHARACTER_ANIM_STATE.CASTING;
+    if(skillData.audio)
+      this.audios[skillData.audio].play();
   }
 };
 

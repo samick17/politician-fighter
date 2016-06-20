@@ -79,6 +79,27 @@ RoomModel.prototype.removeClient = function(clientId) {
   delete this.clients[clientId];
 };
 
+//--begin utils
+var idIndex = 0;
+function genId() {
+  var idx = idIndex;
+  idIndex++;
+  return idx;
+}
+
+function lerp(a, b, t) {
+  return (1-t)*(b-a)+a;
+}
+
+function toHex(num) {
+  return num.toString(16);
+}
+
+function randomRange(from, to) {
+  return parseInt(Math.round(Math.random()*(to-from)))+from;
+}
+
+//--end utils
 
 var appMgr = function() {
   var rooms = {};

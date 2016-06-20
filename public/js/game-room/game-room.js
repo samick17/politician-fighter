@@ -117,7 +117,8 @@ var GameRoom = function(game) {};
   }
 
   function countDownAndStartGame() {
-    function drawText(text) {
+    game.state.start('Arena');
+    /*function drawText(text) {
       var scaleFac = 2;
       var style = { font: 'bold 108px Microsoft Yahei', fill: '#777', align: 'center', boundsAlignH: 'center', boundsAlignV: 'middle' };
       var text = game.add.text(0, 0, text, style);
@@ -135,7 +136,7 @@ var GameRoom = function(game) {};
       if(countDownTime == 0) {
         game.state.start('Arena');
       }
-    }, this);
+    }, this);*/
   }
 
   GameRoom.prototype = {

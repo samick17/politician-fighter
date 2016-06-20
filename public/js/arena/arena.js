@@ -2,9 +2,12 @@ var Arena = function(game) {};
 
 (function() {
 
+  const DEBUG = false;
+
   var characterObj, charCtrl;
   var fireballs;
 
+  var gameMgr;
   var characterData;
 
   Arena.prototype = {
@@ -36,9 +39,11 @@ var Arena = function(game) {};
       fireballs.createMultiple(3, 'firen_ball', 0, false);
 
       var aoFactory = new ArenaObjectFactory(game);
+      gameMgr = new GameManager(aoFactory);
       characterData = appMgr.characters[Object.keys(appMgr.characters)[0]];
-      characterObj = aoFactory.createCharacter(characterData, 500, ArenaSettings.MAX_BASELINE);
+      characterObj = aoFactory.createCharacter(characterData, 500, ArenaSettings.MAX_BASELINE, gameMgr);
       charCtrl = new CharacterController(characterObj, aoFactory);
+      gameMgr.addPlayer(characterObj);
 
       cursors = game.input.keyboard.createCursorKeys();
       game.camera.follow(characterObj.spr);
@@ -67,12 +72,21 @@ var Arena = function(game) {};
         charCtrl.speak(speakContent[speakIndex]);
         speakIndex = (speakIndex+1)%speakContent.length;
       },this);*/
-    },
-    update: function() {
-      characterObj.update();
-      charCtrl.update();
-    },
-    render: function() {
+},
+update: function() {
+  characterObj.update();
+  charCtrl.update();
+  gameMgr.update();
+},
+render: function() {
+  if(DEBUG) {
+    game.debug.body(characterObj.spr);
+    var tmpBullets = gameMgr.bullets;
+    for(var i in tmpBullets) {
+      var bullet = tmpBullets[i];
+      game.debug.body(bullet.spr);
     }
   }
+}
+}
 }());
