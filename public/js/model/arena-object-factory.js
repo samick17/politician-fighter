@@ -28,6 +28,7 @@ ArenaObjectFactory.prototype.createCharacter = function(characterData, x, baseLi
   var character = new Character(charSpr, characterData.anims, AudioResource, baseLine, gameMgr);
   var lifeBar = this.createLifeBar();
   lifeBar.attachTo(character);
+  console.log('sdsdf')
   return character;
 };
 

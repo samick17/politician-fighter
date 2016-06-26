@@ -1,4 +1,6 @@
-var Load = function(game) {};
+var Load = function(game) {
+  this.game = game;
+};
 
 (function() {
 
@@ -9,14 +11,10 @@ var Load = function(game) {};
     }
   }
 
-  Client.on(ServerClientEvent.OnLoadEnd, function(data) {
-    game.state.start('Lobby');
-  });
-
   Load.prototype = {
     preload: function() {
+      game = this.game;
       game.load.spritesheet('loading', 'media/arena/firen_0.png',80,80,70);
-      Client.send(ClientServerEvent.RequestInitial);
       //loadAudios(AudioResource);
     },
     create: function() {
@@ -26,6 +24,10 @@ var Load = function(game) {};
       player.y = game.height - player.height-20;
       player.animations.add('idle', [0,1,2,3,2,1], 10, true);
       player.animations.play('idle');
+      Client.listen(ServerClientEvent.onLoadEnd, function(data) {
+        game.state.start('Arena');
+      });
+      Client.send(ClientServerEvent.init);
       /*var ch = new Character(AudioResource);
       game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR)
       .onDown.add(()=>{ch.attack();}, this);

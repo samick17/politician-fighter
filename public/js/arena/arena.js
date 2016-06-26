@@ -13,7 +13,7 @@ var Arena = function(game) {};
   Arena.prototype = {
     preload: function(cc) {
       game = this.game;
-      characterData = appMgr.characters[Object.keys(appMgr.characters)[0]];
+      characterData = Client.characters[Object.keys(Client.characters)[0]];
       game.load.image('bg', 'media/arena/grass/grass-1.png');
       game.load.image('bg2', 'media/arena/grass/grass-2.png');
       game.load.image('life-bar', 'media/arena/life-bar.png');
@@ -26,6 +26,7 @@ var Arena = function(game) {};
       }
     },
     create: function() {
+      game.stage.disableVisibilityChange = true;
       game.world.setBounds(0, 0, ArenaSettings.BackgroundScale*game.width, game.height);
       game.physics.startSystem(Phaser.Physics.ARCADE);
       bg1 = game.add.tileSprite(0, 0, game.width, 128, 'bg');
@@ -40,7 +41,7 @@ var Arena = function(game) {};
 
       var aoFactory = new ArenaObjectFactory(game);
       gameMgr = new GameManager(aoFactory);
-      characterData = appMgr.characters[Object.keys(appMgr.characters)[0]];
+      characterData = Client.characters[Object.keys(Client.characters)[0]];
       characterObj = aoFactory.createCharacter(characterData, 500, ArenaSettings.MAX_BASELINE, gameMgr);
       charCtrl = new CharacterController(characterObj, aoFactory);
       gameMgr.addPlayer(characterObj);
@@ -64,8 +65,8 @@ var Arena = function(game) {};
       .onDown.add(() => {charCtrl.atkKeyDown();}, this);
       game.input.keyboard.addKey(Phaser.Keyboard.NUMPAD_0)
       .onDown.add(() => {charCtrl.jumpKeyDown();}, this);
-      game.input.keyboard.addKey(Phaser.Keyboard.NUMPAD_ADD)
-      .onDown.add(() => {charCtrl.defKeyDown();}, this);
+      var defKey = game.input.keyboard.addKey(Phaser.Keyboard.NUMPAD_ADD);
+      defKey.onDown.add(() => {charCtrl.defKeyDown();}, this);
       /*const speakContent = ['hi~~', '國民黨不倒 台灣不會好', 'Let\'s battle!', 'Work smart dont\'t work hard'];
       var speakIndex = 0;
       game.time.events.loop(Phaser.Timer.SECOND*2.2, ()=>{

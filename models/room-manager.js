@@ -1,14 +1,14 @@
 var GameRoom = require('./game-room');
-var util = require('util');
-var IEventable = require('./ieventable');
+var inherits = require('util').inherits;
+var IEventable = require('./base/ieventable');
 var OpType = require('./op-type');
-var ServerClientEvent = require('./server-client-event');
+var ServerClientEvent = require('./event-types/server-client-event');
 
 function RoomManager() {
   IEventable.call(this);
   this.rooms = {};
 }
-util.inherits(RoomManager, IEventable);
+inherits(RoomManager, IEventable);
 
 RoomManager.prototype.addRoom = function(params, client) {
   var gameRoom = new GameRoom(params, this);

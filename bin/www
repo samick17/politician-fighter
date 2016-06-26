@@ -3,90 +3,98 @@
 /**
  * Module dependencies.
  */
+ var app = require('../app');
+ var debug = require('debug')('circlewar:server');
+ var http = require('http');
+ //var http = require('http2');
+ var DB = require('../dbs/db');
+ var Config = require('./config');
+ var ServerTask = require('../models/server-task');
+ var ssl = require('../sslLicense');
+ var fs = require('fs');
+ var PORT;
 
-var app = require('../app');
-var debug = require('debug')('boojoe-politics-party-server:server');
-var http = require('http');
-
-/**
- * Get port from environment and store in Express.
- */
-
-var port = normalizePort(process.env.PORT || '80');
-app.set('port', port);
-
-/**
- * Create HTTP server.
- */
-
-var server = http.createServer(app);
-
-/**
- * Listen on provided port, on all network interfaces.
- */
-
-server.listen(port);
-server.on('error', onError);
-server.on('listening', onListening);
-
-require('../socket-server').createSocketServer(server);
-
-/**
- * Normalize a port into a number, string, or false.
- */
-
-function normalizePort(val) {
+ //Normalize a port into a number, string, or false.
+ function normalizePort(val) {
   var port = parseInt(val, 10);
-
-  if (isNaN(port)) {
-    // named pipe
+  if (isNaN(port))
     return val;
-  }
-
-  if (port >= 0) {
-    // port number
+  if (port >= 0)
     return port;
-  }
-
   return false;
 }
 
-/**
- * Event listener for HTTP server "error" event.
- */
-
+//Event listener for HTTP server "error" event.
 function onError(error) {
-  if (error.syscall !== 'listen') {
+  if (error.syscall !== 'listen')
     throw error;
-  }
-
-  var bind = typeof port === 'string'
-    ? 'Pipe ' + port
-    : 'Port ' + port;
-
+  var bind = typeof PORT === 'string'
+  ? 'Pipe ' + PORT
+  : 'Port ' + PORT;
   // handle specific listen errors with friendly messages
   switch (error.code) {
     case 'EACCES':
-      console.error(bind + ' requires elevated privileges');
-      process.exit(1);
-      break;
+    console.error(bind + ' requires elevated privileges');
+    process.exit(1);
+    break;
     case 'EADDRINUSE':
-      console.error(bind + ' is already in use');
-      process.exit(1);
-      break;
+    console.error(bind + ' is already in use');
+    process.exit(1);
+    break;
     default:
-      throw error;
+    throw error;
   }
 }
 
-/**
- * Event listener for HTTP server "listening" event.
- */
-
-function onListening() {
-  var addr = server.address();
-  var bind = typeof addr === 'string'
+////
+function ServerUtil(server) {
+  //Event listener for HTTP server "listening" event.
+  var _onListening = function() {
+    var addr = server.address();
+    var bind = typeof addr === 'string'
     ? 'pipe ' + addr
     : 'port ' + addr.port;
-  debug('Listening on ' + bind);
+    debug('Listening on ' + bind);
+  }
+
+  return {
+    onListening: _onListening
+  };
 }
+
+//
+function startServer(mapServerConfig) {
+  //Get port from environment and store in Express.
+  //PORT = normalizePort(process.env.PORT || '80');
+  PORT = mapServerConfig.port;
+  app.set('port', PORT);
+
+  //Create HTTP server.
+  //var server = http.createServer(ssl.options, app);
+  var server = http.createServer(app);
+  var io = require('socket.io')(server);
+  var game = require('./game')(io, mapServerConfig);
+
+  //Listen on provided port, on all network interfaces.
+  server.listen(PORT);
+  server.on('error', onError);
+  var serverUtil = new ServerUtil(server);
+  server.on('listening', serverUtil.onListening);
+}
+
+//this is entry
+module.exports = function() {
+  const arg = process.argv[2];
+  const mapServerConfig = JSON.parse(arg);
+  DB.initialize(Config);
+  ServerTask.launch(function(err) {
+    if(err) {
+      console.log('server launch failed, please contact to developer');
+      console.error(err);
+      process.exit(0);
+    }
+    else {
+      startServer(mapServerConfig);
+    }
+  });
+}();

@@ -18,71 +18,67 @@ var CreateRoom = function(game) {};
   };
 
   var menuModel = [
-    {
-      id: 0,
-      name: MENU_MAP_TEXT,
-      onMenuSelect: (item) => {
-      },
-      onMenuHover: (item) => {
-        var keyMenuLeft = game.input.keyboard.addKey(Phaser.Keyboard.LEFT);
-        keyMenuLeft.onDown.add(item.choosePreviousMap, this, 0, item);
-        var keyMenuRight = game.input.keyboard.addKey(Phaser.Keyboard.RIGHT);
-        keyMenuRight.onDown.add(item.chooseNextMap, this, 0, item);
-      },
-      onMenuUnhover: (item) => {
-        game.input.keyboard.removeKey(Phaser.Keyboard.LEFT);
-        game.input.keyboard.removeKey(Phaser.Keyboard.RIGHT);
-      },
-      choosePreviousMap: (evt, item) => {
-        selectedMapIndex = Math.abs((selectedMapIndex-1)%Maps.length);
-        var selectedMapParam = Maps[selectedMapIndex];
-        item.name = selectedMapParam.name;
-        menu[item.id].text = item.name;
-        gameParams.mapId = selectedMapParam.id;
-      },
-      chooseNextMap: (evt, item) => {
-        selectedMapIndex = Math.abs((selectedMapIndex+1)%Maps.length);
-        var selectedMapParam = Maps[selectedMapIndex];
-        item.name = selectedMapParam.name;
-        menu[item.id].text = item.name;
-        gameParams.mapId = selectedMapParam.id;
-      }
-    }, {
-      id: 1,
-      name: MENU_PLAYER_TEXT,
-      onMenuSelect: (item) => {
-      },
-      onMenuHover: (item) => {
-        var keyMenuLeft = game.input.keyboard.addKey(Phaser.Keyboard.LEFT);
-        keyMenuLeft.onDown.add(item.choosePreviousCount, this, 0, item);
-        var keyMenuRight = game.input.keyboard.addKey(Phaser.Keyboard.RIGHT);
-        keyMenuRight.onDown.add(item.chooseNextCount, this, 0, item);
-      },
-      onMenuUnhover: (item) => {
-        game.input.keyboard.removeKey(Phaser.Keyboard.LEFT);
-        game.input.keyboard.removeKey(Phaser.Keyboard.RIGHT);
-      },
-      choosePreviousCount: (evt, item) => {
-        selectedMemberCountIndex = Math.abs((selectedMemberCountIndex-1)%MemberCounts.length);
-        var memberParam = MemberCounts[selectedMemberCountIndex];
-        item.name = '{0}-{1}人'.format(MENU_PLAYER_TEXT, memberParam);
-        menu[item.id].text = item.name;
-        gameParams.maxMember = memberParam;
-      },
-      chooseNextCount: (evt, item) => {
-        selectedMemberCountIndex = Math.abs((selectedMemberCountIndex+1)%MemberCounts.length);
-        var memberParam = MemberCounts[selectedMemberCountIndex];
-        item.name = '{0}-{1}人'.format(MENU_PLAYER_TEXT, memberParam);
-        menu[item.id].text = item.name;
-        gameParams.maxMember = memberParam;
-      }
-    }, {
-      id: 2,
-      name: MENU_START_TEXT,
-      onMenuSelect: (item) => {
-        Client.send(ClientServerEvent.CreateGameRoom, gameParams);
-      }
+  {
+    id: 0,
+    name: MENU_MAP_TEXT,
+    onMenuSelect: (item) => {
+    },
+    onMenuHover: (item) => {
+      var keyMenuLeft = game.input.keyboard.addKey(Phaser.Keyboard.LEFT);
+      keyMenuLeft.onDown.add(item.menuItemData.choosePreviousMap, this, 0, item);
+      var keyMenuRight = game.input.keyboard.addKey(Phaser.Keyboard.RIGHT);
+      keyMenuRight.onDown.add(item.menuItemData.chooseNextMap, this, 0, item);
+    },
+    onMenuUnhover: (item) => {
+      game.input.keyboard.removeKey(Phaser.Keyboard.LEFT);
+      game.input.keyboard.removeKey(Phaser.Keyboard.RIGHT);
+    },
+    choosePreviousMap: (evt, item) => {
+      selectedMapIndex = Math.abs((selectedMapIndex-1)%Maps.length);
+      var selectedMapParam = Maps[selectedMapIndex];
+      item.setText(selectedMapParam.name);
+      gameParams.mapId = selectedMapParam.id;
+    },
+    chooseNextMap: (evt, item) => {
+      selectedMapIndex = Math.abs((selectedMapIndex+1)%Maps.length);
+      var selectedMapParam = Maps[selectedMapIndex];
+      item.setText(selectedMapParam.name);
+      gameParams.mapId = selectedMapParam.id;
     }
+  }, {
+    id: 1,
+    name: MENU_PLAYER_TEXT,
+    onMenuSelect: (item) => {
+    },
+    onMenuHover: (item) => {
+      var keyMenuLeft = game.input.keyboard.addKey(Phaser.Keyboard.LEFT);
+      keyMenuLeft.onDown.add(item.menuItemData.choosePreviousCount, this, 0, item);
+      var keyMenuRight = game.input.keyboard.addKey(Phaser.Keyboard.RIGHT);
+      keyMenuRight.onDown.add(item.menuItemData.chooseNextCount, this, 0, item);
+    },
+    onMenuUnhover: (item) => {
+      game.input.keyboard.removeKey(Phaser.Keyboard.LEFT);
+      game.input.keyboard.removeKey(Phaser.Keyboard.RIGHT);
+    },
+    choosePreviousCount: (evt, item) => {
+      selectedMemberCountIndex = Math.abs((selectedMemberCountIndex-1)%MemberCounts.length);
+      var memberParam = MemberCounts[selectedMemberCountIndex];
+      item.setText('{0}-{1}人'.format(MENU_PLAYER_TEXT, memberParam));
+      gameParams.maxMember = memberParam;
+    },
+    chooseNextCount: (evt, item) => {
+      selectedMemberCountIndex = Math.abs((selectedMemberCountIndex+1)%MemberCounts.length);
+      var memberParam = MemberCounts[selectedMemberCountIndex];
+      item.setText('{0}-{1}人'.format(MENU_PLAYER_TEXT, memberParam));
+      gameParams.maxMember = memberParam;
+    }
+  }, {
+    id: 2,
+    name: MENU_START_TEXT,
+    onMenuSelect: (item) => {
+      Client.send(ClientServerEvent.createGameRoom, gameParams);
+    }
+  }
   ];
 
   function moveMenuItemUp() {
@@ -138,28 +134,27 @@ var CreateRoom = function(game) {};
     preload: function() {
     },
     create: function() {
-      highLightGroup = createHighlightMenuItem();
-      var style = { font: "bold 32px Arial", fill: "#fff", boundsAlignH: "center", boundsAlignV: "middle" };
-      for(var i in menuModel) {
-        var mModel = menuModel[i];
-        mModel.menuItem = game.add.text(0, 0, mModel.name, style);
-        menu.push(mModel.menuItem);
-        drawMenuItem(mModel, i, i == selectedMenuIndex);
-      }
-      menuModel[selectedMenuIndex].highlight();
+      var gameMenu = new GameMenu(menuModel);
       keyMenuUp = game.input.keyboard.addKey(Phaser.Keyboard.UP);
-      keyMenuUp.onDown.add(moveMenuItemUp, this);
+      keyMenuUp.onDown.add(function() {
+        gameMenu.previous();
+      }, this);
       keyMenuDown = game.input.keyboard.addKey(Phaser.Keyboard.DOWN);
-      keyMenuDown.onDown.add(moveMenuItemDown, this);
+      keyMenuDown.onDown.add(function() {
+        gameMenu.next();
+      }, this);
       keyMenuSelect = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
-      keyMenuSelect.onDown.add(onMenuSelect, this);
-      var mItem = menuModel[selectedMenuIndex];
-      mItem.onMenuHover(mItem);
+      keyMenuSelect.onDown.add(function() {
+        gameMenu.select();
+      }, this);
+      keyPageUp = game.input.keyboard.addKey(Phaser.Keyboard.ESC);
+      keyPageUp.onDown.add(function() {
+        game.state.start('Lobby');
+      });
     },
     update: function() {
     },
     render: function() {
-      //game.debug.geom(menu[selectedMenuIndex].textBounds);
     }
   }
 }());

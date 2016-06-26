@@ -7,6 +7,7 @@ function createSocketServer(app) {
   var GameClient = require('./model/game-client');
   var RoomManager = require('./model/room-manager');
   var ClientManager = require('./model/client-manager');
+  var GameClientEvent = require('./model/game-client-event');
   var roomMgr = new RoomManager();
   var clientMgr = new ClientManager();
 
@@ -20,8 +21,6 @@ function createSocketServer(app) {
     io.emit(ServerClientEvent.OnRoomRemoved, roomId);
   });
 
-  var allClients = {};
-
   function initGameRoomSocketListener(client) {
     var socket = client.socket;
     socket.on(ClientServerEvent.GameStart, function(data) {
@@ -32,6 +31,16 @@ function createSocketServer(app) {
     });
     socket.on(ClientServerEvent.EnsureSelectCharacter, function() {
       client.ensureSelectCharacter();
+    });
+    socket.on(ClientServerEvent.LeaveRoom, function() {
+      client.leaveRoom();
+    });
+    client.on(GameClientEvent.LeaveRoom, function(client) {
+      client.offSocket(ClientServerEvent.GameStart);
+      client.offSocket(ClientServerEvent.SelectCharacter);
+      client.offSocket(ClientServerEvent.EnsureSelectCharacter);
+      client.offSocket(ClientServerEvent.LeaveRoom);
+      client.off(GameClientEvent.LeaveRoom);
     });
   }
 

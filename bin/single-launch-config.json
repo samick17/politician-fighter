@@ -1,0 +1,23 @@
+{
+  "mapServer": [
+    {
+      "map": "map1",
+      "port": "80",
+      "maxPlayer": "21",
+      "party": [
+        {
+          "Color" : "Red",
+          "MaxMember": 7
+        },
+        {
+          "Color" : "Green",
+          "MaxMember": 7
+        },
+        {
+          "Color" : "Blue",
+          "MaxMember": 7
+        }
+      ]
+    }
+  ]
+}

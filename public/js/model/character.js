@@ -99,8 +99,9 @@ function Character(spr, animDataArr, audioDataArr, baseLine, gameMgr) {
       charObj.emit('skill', 'dba');
     }
   };
+  //this.requestJump();
 }
-inherits(IEventable, Character);
+Utils.inheritPrototype(Character, IEventable);
 
 Character.prototype.onAnimStarted = function(spr, anim) {
   console.log(anim.name);
@@ -207,10 +208,7 @@ Character.prototype.thresh = function() {
 };
 Character.prototype.requestJump = function() {
   var charSpr = this.spr;
-  if(this.isRun) {
-    this.thresh();
-  }
-  else if(this.canJump() && game.time.now > this.nextJump) {
+  if(this.canJump() && game.time.now > this.nextJump) {
     this.stopRun();
     this.animState = CHARACTER_ANIM_STATE.STRETCH;
     var anim = charSpr.animations.play('stretch');
@@ -356,7 +354,13 @@ Character.prototype.requestAttack = function() {
   //console.log('asdsd');
 };
 Character.prototype.requestDefense = function() {
-  this.animState = CHARACTER_ANIM_STATE.DEFENSE;
+  if(this.isRun) {
+    this.thresh();
+  }
+  else {
+    this.animState = CHARACTER_ANIM_STATE.DEFENSE;
+  }
+  //
 };
 Character.prototype.isGenerateSkill = function(currentInputValue) {
   var generated = this.skillGenerator[currentInputValue];
@@ -415,6 +419,7 @@ Character.prototype.update = function() {
     //charSpr.animations.play('defense');
     break;
   }
+
   if((charObj.isJump()) && charSpr.body.y > charObj.baseLine * ArenaSettings.BaseLineHeight) {
     charObj.grounded();
   }
