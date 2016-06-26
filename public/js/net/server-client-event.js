@@ -1,19 +1,12 @@
 var ServerClientEvent = function() {
   return {
-    allClients: 'a',
-    onClientConnect: 'b',
-    onClientDisconnect: 'c',
-    profile: 'd',
-    allRooms: 'e',
-    loadCharacters: 'f',
-    onRoomCreated: 'g',
-    onRoomRemoved: 'h',
-    onJoinRoom: 'i',
-    onLeaveRoom: 'j',
-    onLoadEnd: 'k',
-    selectCharacter: 'l',
-    ensureSelectCharacter: 'm',
-    refreshRoomMembers: 'n',
-    gameStart: 'o'
+    profile: 'b',
+    loadCharacters: 'c',
+    onJoinRoom: 'd',
+    onLeaveRoom: 'e',
+    onLoadEnd: 'f',
+    selectCharacter: 'g',
+    ensureSelectCharacter: 'h',
+    gameStart: 'i'
   };
 }();

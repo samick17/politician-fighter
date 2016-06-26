@@ -8,34 +8,52 @@ var GameRoom = function(game) {};
   var highLightGroup;
   var memberSlots = {};
 
-  Client.listen(ServerClientEvent.onLeaveRoom, (data) => {
-    var roomData = data.room;
-    var clientId = data.clientId;
-    var gameRoom = Client.getRoom();
-    if(gameRoom.getClientById(clientId).id === Client.getPlayer().id) {
-      Client.leaveRoom();
-      game.state.start('Lobby');
-    }
-    else {
-      gameRoom.update(roomData);
-      memberSlots[data.slotIndex].leave();
-    }
-  });
-  Client.listen(ServerClientEvent.selectCharacter, (data) => {
-    var clientData = data.client;
-    Client.getRoom().updateClient(clientData);
-    memberSlots[data.slotIndex].draw();
-  });
-  Client.listen(ServerClientEvent.ensureSelectCharacter, (data) => {
-    var clientData = data.client;
-    var gameRoom = Client.getRoom();
-    gameRoom.updateClient(clientData);
-    var client = gameRoom.getClientById(clientData.id);
-    memberSlots[data.slotIndex].selectCharacter();
-  });
-  Client.listen(ServerClientEvent.gameStart, (data) => {
-    countDownAndStartGame(3);
-  });
+  function unregisterGameRoomSocketListener() {
+    Client.offSocket(ServerClientEvent.onJoinRoom);
+    Client.offSocket(ServerClientEvent.onLeaveRoom);
+    Client.offSocket(ServerClientEvent.selectCharacter);
+    Client.offSocket(ServerClientEvent.ensureSelectCharacter);
+    Client.offSocket(ServerClientEvent.gameStart);
+  }
+
+  function navigateTo(name) {
+    unregisterGameRoomSocketListener();
+    game.state.start(name);
+  }
+
+  function registerGameRoomSocketListener() {
+    Client.listen(ServerClientEvent.onJoinRoom, (data) => {
+      Client.getRoom().addClient(new BasePlayer(data.client));
+    });
+    Client.listen(ServerClientEvent.onLeaveRoom, (data) => {
+      var roomData = data.room;
+      var clientId = data.clientId;
+      var gameRoom = Client.getRoom();
+      if(clientId === Client.getPlayer().id) {
+        Client.leaveRoom();
+        navigateTo('Lobby');
+      }
+      else {
+        var client = gameRoom.removeClient(clientId);
+        memberSlots[client.slotIndex].leave();
+      }
+    });
+    Client.listen(ServerClientEvent.selectCharacter, (data) => {
+      var clientData = data.client;
+      Client.getRoom().updateClient(clientData);
+      memberSlots[data.slotIndex].draw();
+    });
+    Client.listen(ServerClientEvent.ensureSelectCharacter, (data) => {
+      var clientData = data.client;
+      var gameRoom = Client.getRoom();
+      gameRoom.updateClient(clientData);
+      var client = gameRoom.getClientById(clientData.id);
+      memberSlots[clientData.slotIndex].selectCharacter();
+    });
+    Client.listen(ServerClientEvent.gameStart, (data) => {
+      countDownAndStartGame(3);
+    });
+  }
 
   function countDownAndStartGame(countDownTime) {
     function drawText(text) {
@@ -53,7 +71,7 @@ var GameRoom = function(game) {};
       countDownTime -= 1;
       text = drawText(countDownTime);
       if(countDownTime == 0) {
-        game.state.start('Arena');
+        navigateTo('Arena');
       }
     }, this);
   }
@@ -110,6 +128,7 @@ var GameRoom = function(game) {};
   };
 
   MemberSlot.prototype.leave = function() {
+    this.deselectCharacter();
     if(this.clientSpr) {
       this.spr.remove(this.clientSpr);
       delete this.clientSpr;
@@ -142,12 +161,13 @@ var GameRoom = function(game) {};
 
   MemberSlot.prototype.deselectCharacter = function() {
     if(this.selectSpr) {
-      this.spr.remove(this.selectSpr);
+      this.spr.remove(this.selectSpr, true);
       delete this.selectSpr;
     }
   };
 
   MemberSlot.prototype.selectCharacter = function() {
+    this.deselectCharacter();
     this.lowlight();
     this.selectSpr = game.add.image(0, 0, 'select-character');
     this.spr.add(this.selectSpr);
@@ -155,6 +175,7 @@ var GameRoom = function(game) {};
 
   GameRoom.prototype = {
     preload: function() {
+      registerGameRoomSocketListener();
       var candidateCharacters = Client.candidateCharacters;
       for(var i in candidateCharacters) {
         var cch = candidateCharacters[i];
@@ -178,7 +199,7 @@ var GameRoom = function(game) {};
         slot.setEmpty();
       }
       gameRoom.on('addClient', function(data) {
-        var slot = memberSlots[data.slotIndex];
+        var slot = memberSlots[data.client.slotIndex];
         slot.join(gameRoom.getClientById(data.client.id));
       });
       gameRoom.init();

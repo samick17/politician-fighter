@@ -24,8 +24,18 @@ var Load = function(game) {
       player.y = game.height - player.height-20;
       player.animations.add('idle', [0,1,2,3,2,1], 10, true);
       player.animations.play('idle');
+      Client.listen(ServerClientEvent.profile, function(data) {
+        Client.setPlayer(data);
+      });
+      Client.listen(ServerClientEvent.loadCharacters, function(data) {
+        Client.characters = data.characters;
+        Client.candidateCharacters = data.candidateCharacters;
+      });
       Client.listen(ServerClientEvent.onLoadEnd, function(data) {
-        game.state.start('Arena');
+        Client.offSocket(ServerClientEvent.profile);
+        Client.offSocket(ServerClientEvent.loadCharacters);
+        Client.offSocket(ServerClientEvent.onLoadEnd);
+        game.state.start('Lobby');
       });
       Client.send(ClientServerEvent.init);
       /*var ch = new Character(AudioResource);

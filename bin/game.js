@@ -40,11 +40,6 @@ function initGameSocket(socket, roomMgr, client) {
       client.offSocket(GameClientEvent.LeaveRoom);
     });
   }
-  //
-  //TODO broadcast room clients
-  socket.emit(ServerClientEvent.profile, client.toJson());
-  socket.emit(ServerClientEvent.loadCharacters, {characters: CharacterLoader.characters, candidateCharacters: CharacterLoader.candidateCharacters});
-  socket.emit(ServerClientEvent.onLoadEnd);
 
   socket.on(ClientServerEvent.createGameRoom, function(data) {
     if(client.gameRoom)
@@ -58,6 +53,10 @@ function initGameSocket(socket, roomMgr, client) {
     roomMgr.addToRandomRoom(client);
     initGameRoomSocketListener(client);
   });
+  //TODO broadcast room clients
+  socket.emit(ServerClientEvent.profile, client.toJson());
+  socket.emit(ServerClientEvent.loadCharacters, {characters: CharacterLoader.characters, candidateCharacters: CharacterLoader.candidateCharacters});
+  socket.emit(ServerClientEvent.onLoadEnd);
 }
 
 //Package here

@@ -69,9 +69,8 @@ function Player(data) {
 }
 Utils.inheritPrototype(Player, BasePlayer);
 
-Player.prototype.joinRoom = function(roomData, slotIndex) {
+Player.prototype.joinRoom = function(roomData) {
   this.room = new RoomModel(roomData);
-  game.state.start('GameRoom');
 };
 
 Player.prototype.leaveRoom = function() {
@@ -86,20 +85,20 @@ function RoomModel(data) {
   for(var i in data) {
     this[i] = data[i];
   }
+  this.clients = {};
 }
 Utils.inheritPrototype(RoomModel, IEventable);
 
 RoomModel.prototype.init = function() {
-  if(!this.clients) {
-    this.clients = {};
-    for(var i in this.members) {
-      var client = this.members[i];
-      if(client.id === Client.getPlayer().id) {
-        this.addClient(Client.getPlayer(), i);
-      }
-      else {
-        this.addClient(new BasePlayer(client), i);
-      }
+  this.clients = {};
+  for(var i in this.members) {
+    var client = this.members[i];
+    if(client.id === Client.getPlayer().id) {
+      Client.getPlayer().update(client);
+      this.addClient(Client.getPlayer(), i);
+    }
+    else {
+      this.addClient(new BasePlayer(client), client.slotIndex);
     }
   }
 };
@@ -113,13 +112,15 @@ RoomModel.prototype.update = function(data) {
   this.emit(OpType.update, this);
 };
 
-RoomModel.prototype.addClient = function(client, slotIndex) {
+RoomModel.prototype.addClient = function(client) {
   this.clients[client.id] = client;
-  this.emit('addClient', {client: client, slotIndex: slotIndex});
+  this.emit('addClient', {client: client});
 };
 
 RoomModel.prototype.removeClient = function(clientId) {
+  var client = this.clients[clientId];
   delete this.clients[clientId];
+  return client;
 };
 
 RoomModel.prototype.updateClient = function(clientData) {

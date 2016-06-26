@@ -49,7 +49,7 @@ function GameRoom(params, roomMgr) {
   room.clients = {};
   room.posSlots = new PositionSlots(room.maxMember);
   room.on(GameRoomEvent.ensureSelectCharacter, function(gameClient) {
-    room.broadcast(ServerClientEvent.ensureSelectCharacter, {client: gameClient.toJson(), slotIndex: room.getClientSlotIndex(gameClient)});
+    room.broadcast(ServerClientEvent.ensureSelectCharacter, {client: room.clientToJson(gameClient)});
     if(room.isReady()) {
       room.broadcast(ServerClientEvent.gameStart, {});
     }
@@ -72,8 +72,7 @@ GameRoom.prototype.addClient = function(client) {
   this.posSlots.addItem(client);
   this.clients[client.id] = client;
   client.joinRoom(this);
-  var slotIndex = this.getClientSlotIndex(client);
-  this.broadcast(ServerClientEvent.onJoinRoom, {client: client.toJson(), room: this.toJson(), slotIndex: slotIndex});
+  this.broadcast(ServerClientEvent.onJoinRoom, {client: this.clientToJson(client), room: this.toJson()});
 };
 
 GameRoom.prototype.removeClient = function(client) {
@@ -81,7 +80,7 @@ GameRoom.prototype.removeClient = function(client) {
   if(client) {
     var slotIndex = this.getClientSlotIndex(client);
     client.doLeaveRoom();
-    this.broadcast(ServerClientEvent.onLeaveRoom, {room: this.toJson(), clientId: client.id, slotIndex: slotIndex});
+    this.broadcast(ServerClientEvent.onLeaveRoom, {room: this.toJson(), clientId: client.id});
     delete this.clients[client.id];
     this.posSlots.removeItem(client);
     if(Object.keys(this.clients).length === 0) {
@@ -102,9 +101,7 @@ GameRoom.prototype.broadcast = function(name, pkg) {
 };
 
 GameRoom.prototype.breakup = function() {
-  if(this.roomMgr.removeRoom(this.id)) {
-    this.broadcast(ServerClientEvent.roomBreakUp, {});
-  }
+  this.roomMgr.removeRoom(this.id);
 };
 
 GameRoom.prototype.isFull = function() {
@@ -115,11 +112,15 @@ GameRoom.prototype.clientsToJsonArray = function() {
   var jsonClientArr = [];
   for(var i in this.clients) {
     var client = this.clients[i];
-    var jsonClient = client.toJson();
-    jsonClient.slotIndex = this.getClientSlotIndex(client);
-    jsonClientArr.push(jsonClient);
+    jsonClientArr.push(this.clientToJson(client));
   }
   return jsonClientArr;
+}
+
+GameRoom.prototype.clientToJson = function(client) {
+  var jsonClient = client.toJson();
+  jsonClient.slotIndex = this.getClientSlotIndex(client);
+  return jsonClient;
 }
 
 GameRoom.prototype.toJson = function() {

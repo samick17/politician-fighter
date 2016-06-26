@@ -8,19 +8,17 @@ var Lobby = function(game) {};
   {id: 2, name: '按鍵設定', onMenuSelect: () => {console.log('keyboard settings');}}
   ];
 
-  Client.listen(ServerClientEvent.profile, function(data) {
-    Client.setPlayer(data);
-  });
-  Client.listen(ServerClientEvent.loadCharacters, function(data) {
-    Client.characters = data.characters;
-    Client.candidateCharacters = data.candidateCharacters;
-  });
-  Client.listen(ServerClientEvent.onJoinRoom, (data) => {
-    Client.getPlayer().joinRoom(data.room, data.slotIndex);
-  });
+  function registerLobbySocketListener() {
+    Client.listen(ServerClientEvent.onJoinRoom, (data) => {
+      Client.getPlayer().joinRoom(data.room);
+      Client.offSocket(ServerClientEvent.onJoinRoom);
+      game.state.start('GameRoom');
+    });
+  }
 
   Lobby.prototype = {
     preload: function() {
+      registerLobbySocketListener();
       game.load.image('highlight', '/media/highlight-red.png');
     },
     create: function() {
