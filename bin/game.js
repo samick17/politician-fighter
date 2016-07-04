@@ -20,9 +20,6 @@ function initGameSocket(socket, roomMgr, client) {
 
   function initGameRoomSocketListener(client) {
     var socket = client.socket;
-    socket.on(ClientServerEvent.gameStart, function(data) {
-      console.log(data);
-    });
     socket.on(ClientServerEvent.selectCharacter, function(index) {
       client.selectCharacter(index);
     });

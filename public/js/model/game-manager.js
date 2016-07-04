@@ -1,46 +1,106 @@
 function GameManager(aoFactory) {
   this.aoFactory = aoFactory;
-  this.characters = {};
-  this.bullets = {};
+  this.aoFactory.gameMgr = this;
+  this.gameObjectsManager = aoFactory.createObjectManager();
+  this.projectileObjectsManager = aoFactory.createObjectManager();
+  this.characterManager = aoFactory.createObjectManager();
+  this.partyManager = aoFactory.createObjectManager();
 }
 
-GameManager.prototype.addPlayer = function(character) {
-  this.characters[character.id] = character;
+//inner
+GameManager.prototype.addGameObject = function(gameObject) {
+  this.gameObjectsManager.add(gameObject);
+  return gameObject;
 };
 
-GameManager.prototype.removePlayer = function(character) {
-  delete this.characters[character.id];
+//inner
+GameManager.prototype.removeGameObject = function(id) {
+  var go = this.gameObjectsManager.removeById(id);
+  if(go) {
+    go.destroy();
+  }
 };
 
-GameManager.prototype.punch = function(character) {
-  var punchObj = this.aoFactory.createPunch(character);
-  this.addBullet(punchObj);
-}
-
-GameManager.prototype.addBullet = function(bullet) {
-  this.bullets[bullet.id] = bullet;
+GameManager.prototype.getGameObjectById = function(id) {
+  return this.gameObjectsManager.getById(id);
 };
 
-GameManager.prototype.removeBullet = function(bullet) {
-  delete this.bullets[bullet.id];
+GameManager.prototype.addPlayer = function(resName) {
+  var character = this.aoFactory.createCharacter(this, 500, ArenaSettings.MAX_BASELINE, resName);
+  this.characterManager.add(character);
+  return character;
 };
 
-GameManager.prototype.applyPunch = function(character, bullet) {
-  console.log('character:'+character.id+' has been attack by bullet:'+bullet.id);
-  character.applyDamage(bullet.damage);
-  bullet.spr.destroy();
-  this.removeBullet(bullet);
+GameManager.prototype.removePlayer = function(id) {
+  var character = this.characterManager.removeById(id);
+  if(character) {
+    character.destroy();
+  }
+};
+
+GameManager.prototype.addMapItem = function(mapItem) {
+  if('box' in mapItem) {
+    return this.addGameObject(this.aoFactory.createWoodenBox(mapItem['box']));
+  }
+  else if('weapon' in mapItem) {
+    return this.addGameObject(this.aoFactory.createWeaponProp(mapItem['weapon']));
+  }
+};
+
+GameManager.prototype.removeMapItem = function(id) {
+  this.removeGameObject(id);
+};
+
+GameManager.prototype.addSkillGameObject = function(coord, skillName) {
+  var bullet = this.aoFactory.createBullet(coord, skillName);
+  this.projectileObjectsManager.add(bullet);
+  return bullet;
+};
+
+/*GameManager.prototype.addProjectileItem = function(projectileItem) {
+  if('bullet' in projectileItem) {
+    var bullet = this.aoFactory.createBullet(projectileItem['bullet']);
+    this.projectileObjectsManager.add(bullet);
+    return bullet;
+  }
+};*/
+
+GameManager.prototype.removeProjectileItem = function(id) {
+  var go = this.projectileObjectsManager.removeById(id);
+  if(go) {
+    go.destroy();
+  }
+};
+
+GameManager.prototype.getProjectileItemById = function(id) {
+  return this.projectileObjectsManager.getById(id);
 };
 
 GameManager.prototype.update = function() {
-  var gameMgr = this;
-  var tmpCharacters = this.characters;
-  var tmpBullets = this.bullets;
-  for(var i in tmpCharacters) {
+  //this.characterManager.update();
+  //this.projectileObjectsManager.update();/*var gameMgr = this;
+  var tmpGos = this.gameObjectsManager.objs;
+  var tmpBullets = this.projectileObjectsManager.objs;
+  for(var i in tmpGos) {
+    //console.log(i)
     for(var j in tmpBullets) {
-      var character = tmpCharacters[i];
+      var go = tmpGos[i];
       var bullet = tmpBullets[j];
-      game.physics.arcade.overlap(character.spr, bullet.spr, ()=> {gameMgr.applyPunch(character, bullet);}, null, this);
+      if(bullet.isAlive) {
+        game.physics.arcade.overlap(go.spr, bullet.spr, ()=>{
+          go.onCollided(bullet);
+          bullet.onCollided(go);
+          //go.shake(direction);
+          //bullet.blowup();
+        }, null, this);
+      }
+      //game.physics.arcade.overlap(character.spr, bullet.spr, ()=> {}, null, this);
     }
   }
-}
+};
+
+const offsetCol = {x: 32, z: 0};
+const offsetRow = {x: 0, z: 16};
+GameManager.prototype.coordToGamePos = function(coord) {
+  return new Vector(coord.x*32, coord.y*8, coord.z*16);
+};

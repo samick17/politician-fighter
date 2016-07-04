@@ -4,6 +4,7 @@ var uuid = require('node-uuid');
 var ServerClientEvent = require('./event-types/server-client-event');
 var OpType = require('./op-type');
 var GameRoomEvent = require('./game-room-event');
+var Arena = require('./arena');
 
 function PositionSlots(count) {
   this.slots = {};
@@ -51,7 +52,7 @@ function GameRoom(params, roomMgr) {
   room.on(GameRoomEvent.ensureSelectCharacter, function(gameClient) {
     room.broadcast(ServerClientEvent.ensureSelectCharacter, {client: room.clientToJson(gameClient)});
     if(room.isReady()) {
-      room.broadcast(ServerClientEvent.gameStart, {});
+      room.gameStart();
     }
   });
 };
@@ -84,7 +85,7 @@ GameRoom.prototype.removeClient = function(client) {
     delete this.clients[client.id];
     this.posSlots.removeItem(client);
     if(Object.keys(this.clients).length === 0) {
-      this.breakup();
+      this.roomMgr.removeRoom(this.id);
     }
   }
 };
@@ -101,7 +102,10 @@ GameRoom.prototype.broadcast = function(name, pkg) {
 };
 
 GameRoom.prototype.breakup = function() {
-  this.roomMgr.removeRoom(this.id);
+  for(var i in this.clients) {
+    var client = this.clients[i];
+    this.removeClient(client);
+  }
 };
 
 GameRoom.prototype.isFull = function() {
@@ -115,13 +119,20 @@ GameRoom.prototype.clientsToJsonArray = function() {
     jsonClientArr.push(this.clientToJson(client));
   }
   return jsonClientArr;
-}
+};
 
 GameRoom.prototype.clientToJson = function(client) {
   var jsonClient = client.toJson();
   jsonClient.slotIndex = this.getClientSlotIndex(client);
   return jsonClient;
-}
+};
+
+GameRoom.prototype.gameStart = function() {
+  var room = this;
+  room.broadcast(ServerClientEvent.gameStart, {});
+  room.arena = new Arena(room);
+  room.arena.gameStart();
+};
 
 GameRoom.prototype.toJson = function() {
   return {

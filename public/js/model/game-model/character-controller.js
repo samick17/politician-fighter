@@ -1,18 +1,17 @@
+const COMBO_KEY_THRESHOLD = 300;
+
 function CharacterController(character, aoFactory) {
-  this.character = character;
-  this.currentInput = [];
-  this.lastLeftKeyDown = Number.NEGATIVE_INFINITY;
-  this.lastRightKeyDown = Number.NEGATIVE_INFINITY;
-  this.lastInputTime = Number.NEGATIVE_INFINITY;
-  this.inputTimeout = Number.NEGATIVE_INFINITY;
-  this.aoFactory = aoFactory;
-  this.nextFire = Number.NEGATIVE_INFINITY;
-  this.fireRate = 300;
-
   var charCtrl = this;
-
+  charCtrl.character = character;
+  charCtrl.currentInput = [];
+  charCtrl.lastLeftKeyDown = Number.NEGATIVE_INFINITY;
+  charCtrl.lastRightKeyDown = Number.NEGATIVE_INFINITY;
+  charCtrl.lastInputTime = Number.NEGATIVE_INFINITY;
+  charCtrl.inputTimeout = Number.NEGATIVE_INFINITY;
+  charCtrl.aoFactory = aoFactory;
+  charCtrl.nextFire = Number.NEGATIVE_INFINITY;
+  charCtrl.fireRate = 300;
   charCtrl.character.on('skill', (skill) => {
-    charCtrl.spawnSkill();
     var skillData = charCtrl.character.characterSkillData[skill];
     charCtrl.castSkill(skillData);
   });
@@ -102,24 +101,11 @@ CharacterController.prototype.appendInput = function(inputText) {
       this.inputTimeout = Number.NEGATIVE_INFINITY;
       return false;
     }
-    this.inputTimeout = game.time.now + 300;
+    this.inputTimeout = game.time.now + COMBO_KEY_THRESHOLD;
     this.lastInputTime = game.time.now;
     return true;
   }
   return false;
-};
-
-CharacterController.prototype.spawnSkill = function() {
-  var charObj = this.character;
-  this.nextFire = game.time.now + this.fireRate;
-  var ballX = charObj.spr.x;
-  var bullet = this.aoFactory.createBullet(charObj, ballX, charObj.baseLine);
-  if(charObj.spr.scale.x < 0) {
-    bullet.turnLeft();
-  } else {
-    bullet.turnRight();
-  }
-  bullet.blast();
 };
 
 CharacterController.prototype.update = function() {
@@ -130,10 +116,21 @@ CharacterController.prototype.update = function() {
 
 CharacterController.prototype.castSkill = function(skillData) {
   var charCtrl = this;
-  console.log('asdasd')
   charCtrl.speak(skillData.name);
   var charObj = charCtrl.character;
-  charObj.castSkill(skillData);
+  charObj.animCastSkill(skillData);
+  charCtrl.spawnSkill(skillData.skillName);
+};
+
+CharacterController.prototype.spawnSkill = function(skillName) {
+  var charObj = this.character;
+  this.nextFire = game.time.now + this.fireRate;
+  var bullet = charObj.gameMgr.addSkillGameObject(charObj.coord.add(new Vector(2,0,0)), skillName);
+  if(charObj.spr.scale.x < 0) {
+    bullet.turnLeft();
+  } else {
+    bullet.turnRight();
+  }
 };
 
 CharacterController.prototype.speak = function(text) {
@@ -141,6 +138,8 @@ CharacterController.prototype.speak = function(text) {
   if(this.chatboxgroup) {
     this.chatboxgroup.destroy();
   }
-  this.chatboxgroup = this.aoFactory.createChatBoxGroup(charObj, text);
-  this.chatboxgroup.setContent(text);
+  if(text) {
+    this.chatboxgroup = this.aoFactory.createChatBoxGroup(charObj, text);
+    this.chatboxgroup.setContent(text);
+  }
 };

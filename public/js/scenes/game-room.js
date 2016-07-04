@@ -41,7 +41,11 @@ var GameRoom = function(game) {};
     Client.listen(ServerClientEvent.selectCharacter, (data) => {
       var clientData = data.client;
       Client.getRoom().updateClient(clientData);
-      memberSlots[data.slotIndex].draw();
+      var memberSlot = memberSlots[data.slotIndex];
+      memberSlot.draw();
+      if(clientData.id === Client.getPlayer().id) {
+        memberSlot.highlight();
+      }
     });
     Client.listen(ServerClientEvent.ensureSelectCharacter, (data) => {
       var clientData = data.client;
@@ -98,7 +102,7 @@ var GameRoom = function(game) {};
     }
     else if(this.client) {
       this.removeCharacter();
-      this.clientSpr = game.add.image(0, 0, Client.candidateCharacters[this.client.characterIndex].name);
+      this.clientSpr = game.add.image(0, 0, Client.characters[Object.keys(Client.characters)[this.client.characterIndex]].name);
       this.spr.add(this.clientSpr);
     }
   };
@@ -112,7 +116,7 @@ var GameRoom = function(game) {};
 
   MemberSlot.prototype.addCharacter = function() {
     this.removeCharacter();
-    this.clientSpr = game.add.image(0, 0, Client.candidateCharacters[this.client.characterIndex].name);
+    this.clientSpr = game.add.image(0, 0, Client.characters[Object.keys(Client.characters)[this.client.characterIndex]].name);
     this.spr.add(this.clientSpr);
   };
 
@@ -176,7 +180,7 @@ var GameRoom = function(game) {};
   GameRoom.prototype = {
     preload: function() {
       registerGameRoomSocketListener();
-      var candidateCharacters = Client.candidateCharacters;
+      var candidateCharacters = Client.characters;
       for(var i in candidateCharacters) {
         var cch = candidateCharacters[i];
         game.load.image(cch.name, cch.avatarPath);
@@ -203,17 +207,17 @@ var GameRoom = function(game) {};
         slot.join(gameRoom.getClientById(data.client.id));
       });
       gameRoom.init();
-      var candidateCharacters = Client.candidateCharacters;
+      var candidateCharacters = Client.characters;
       var character = Client.getPlayer();
       graphics = game.add.graphics(0,0);
       /*previous character*/
       game.input.keyboard.addKey(Phaser.Keyboard.LEFT).onDown.add(()=>{
-        var charIndex = MathUtils.previous(character.characterIndex, candidateCharacters.length);
+        var charIndex = Utils.previous(character.characterIndex, Object.keys(candidateCharacters).length);
         Client.send(ClientServerEvent.selectCharacter, charIndex);
       }, this, 0);
       /*next character*/
       game.input.keyboard.addKey(Phaser.Keyboard.RIGHT).onDown.add(()=>{
-        var charIndex = MathUtils.previous(character.characterIndex, candidateCharacters.length);
+        var charIndex = Utils.previous(character.characterIndex, Object.keys(candidateCharacters).length);
         Client.send(ClientServerEvent.selectCharacter, charIndex);
       }, this, 0);
       /*select character*/

@@ -85,7 +85,7 @@ var CreateRoom = function(game) {};
     var mItem = menuModel[selectedMenuIndex];
     if(mItem.onMenuUnhover)
       mItem.onMenuUnhover(mItem);
-    selectedMenuIndex = MathUtils.clamp(selectedMenuIndex-1, 0, menu.length-1);
+    selectedMenuIndex = Utils.clamp(selectedMenuIndex-1, 0, menu.length-1);
     mItem = menuModel[selectedMenuIndex];
     if(mItem.onMenuHover) {
       mItem.onMenuHover(mItem);
@@ -96,7 +96,7 @@ var CreateRoom = function(game) {};
     var mItem = menuModel[selectedMenuIndex];
     if(mItem.onMenuUnhover)
       mItem.onMenuUnhover(mItem);
-    selectedMenuIndex = MathUtils.clamp(selectedMenuIndex+1, 0, menu.length-1);
+    selectedMenuIndex = Utils.clamp(selectedMenuIndex+1, 0, menu.length-1);
     mItem = menuModel[selectedMenuIndex];
     if(mItem.onMenuHover) {
       mItem.onMenuHover(mItem);

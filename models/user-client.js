@@ -23,19 +23,18 @@ UserClient.prototype.joinRoom = function(room) {
 UserClient.prototype.doLeaveRoom = function() {
   if(this.gameRoom) {
     delete this.gameRoom;
+    this.isLockCharacter = false;
     this.emit(GameClientEvent.LeaveRoom, this);
   }
 };
 
 UserClient.prototype.leaveRoom = function() {
   if(this.gameRoom) {
-    this.isLockCharacter = false;
     this.gameRoom.removeClient(this);
   }
 };
 
 UserClient.prototype.disconnect = function() {
-  console.log('disconnect');
   this.leaveRoom();
   delete this.socket.handshake.session.uid;
 };

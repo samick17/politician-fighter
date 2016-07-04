@@ -2,7 +2,7 @@
   "mapServer": [
     {
       "map": "map1",
-      "port": "80",
+      "port": "8080",
       "maxPlayer": "21",
       "party": [
         {

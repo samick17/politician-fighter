@@ -7,7 +7,8 @@ var ServerClientEvent = function() {
     onLoadEnd: 'f',
     selectCharacter: 'g',
     ensureSelectCharacter: 'h',
-    gameStart: 'i'
+    gameStart: 'i',
+    gameOver: 'j'
   };
 }();
 

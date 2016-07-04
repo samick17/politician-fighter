@@ -14,7 +14,7 @@ var Load = function(game) {
   Load.prototype = {
     preload: function() {
       game = this.game;
-      game.load.spritesheet('loading', 'media/arena/firen_0.png',80,80,70);
+      game.load.spritesheet('loading', 'media/arena/freeze.png',80,80,70);
       //loadAudios(AudioResource);
     },
     create: function() {
@@ -35,7 +35,7 @@ var Load = function(game) {
         Client.offSocket(ServerClientEvent.profile);
         Client.offSocket(ServerClientEvent.loadCharacters);
         Client.offSocket(ServerClientEvent.onLoadEnd);
-        game.state.start('Lobby');
+        game.state.start('Arena');
       });
       Client.send(ClientServerEvent.init);
       /*var ch = new Character(AudioResource);

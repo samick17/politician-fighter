@@ -5,7 +5,16 @@ var forward = function(url) {
 var Utils = function() {
   return {
     clamp: function(c, min, max) {
-      return c < min ? min: c > max ? max: c;
+      return c < min ? min : c > max ? max : c;
+    },
+    previous: function(i, range) {
+      var r = (i -1) % range;
+      if(r < 0)
+        r += range;
+      return r;
+    },
+    next: function(i, range) {
+      return (i +1) % range;
     },
     init: function(model, data) {
       var keys = data?Object.keys(data):[];
@@ -142,9 +151,6 @@ var Utils = function() {
       for(var k in keys)
         arr.push(dict[k]);
       return arr;
-    },
-    clamp: function(c, min, max) {
-      return c < min ? min : c > max ? max : c;
     },
     downloadByUrl: function(url, contentType) {
       var downloadElement = $('<a/>');
@@ -396,14 +402,12 @@ var VK = (function() {
   };
 })();
 
-var OpType = (function() {
-  return {
-    refresh: 'a',
-    addItem: 'b',
-    removeItem: 'c',
-    updateItem: 'd'
-  };
-})();
+const OpType = {
+  add: 'a',
+  remove: 'b',
+  update: 'c',
+  refresh: 'd'
+};
 
 var UAC = function() {
   return {
