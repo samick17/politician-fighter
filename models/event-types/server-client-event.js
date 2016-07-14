@@ -8,8 +8,52 @@ var ServerClientEvent = function() {
     selectCharacter: 'g',
     ensureSelectCharacter: 'h',
     gameStart: 'i',
-    gameOver: 'j'
-  };
+    gameOver: 'j',
+
+    loadMaps: 'k',
+    loadAllPlayers: 'l',
+    setPlayer: 'm',
+    requestPlayParamsError: 'n',
+
+    join: 'o',
+    exit: 'p',
+    rotate: 'q',
+    attack: 'r',
+    characterList: 's',
+    removeCharacter: 't',
+    partyList: 'u',
+
+    addPlayer: 'v',
+    removePlayer: 'w',
+    moveTo: 'x',
+    lookAt: 'y',
+    addMapItem: 'z',
+    removeMapItem: 'aa',
+    updateCoinAmount: 'ab',
+    updateHp: 'ac',
+    updateMapItemHp: 'ad',
+    requestAttack: 'ae',
+    addProjectileItem: 'af',
+    removeProjectileItem: 'ag',
+    projectileMoveTo: 'ah',
+    obtainItem: 'ai',
+    releaseItem: 'aj',
+    transportTo: 'ak',
+    applyForceTo: 'al',
+    updatePartyScore: 'am',
+    updateRank: 'an',
+    updateRankingBoard: 'ao',
+    changeState: 'ap',
+    updateCharacter: 'aq',
+    updateEnergy: 'ar',
+    addBuff: 'as',
+    removeBuff: 'at',
+    broadcastKilling: 'au',
+    switchToRunMode: 'av',
+    jump: 'aw',
+    doubleJump: 'ax',
+    idle: 'ay'
+};
 }();
 
 module.exports = ServerClientEvent;

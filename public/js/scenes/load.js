@@ -24,20 +24,23 @@ var Load = function(game) {
       player.y = game.height - player.height-20;
       player.animations.add('idle', [0,1,2,3,2,1], 10, true);
       player.animations.play('idle');
-      Client.listen(ServerClientEvent.profile, function(data) {
-        Client.setPlayer(data);
-      });
-      Client.listen(ServerClientEvent.loadCharacters, function(data) {
-        Client.characters = data.characters;
-        Client.candidateCharacters = data.candidateCharacters;
-      });
-      Client.listen(ServerClientEvent.onLoadEnd, function(data) {
-        Client.offSocket(ServerClientEvent.profile);
-        Client.offSocket(ServerClientEvent.loadCharacters);
-        Client.offSocket(ServerClientEvent.onLoadEnd);
-        game.state.start('Arena');
-      });
-      Client.send(ClientServerEvent.init);
+      Client.connect(function() {
+        Client.listen(ServerClientEvent.profile, function(data) {
+          Client.setPlayer(data);
+        });
+        Client.listen(ServerClientEvent.loadCharacters, function(data) {
+          Client.characters = data.characters;
+        });
+        Client.listen(ServerClientEvent.onLoadEnd, function(data) {
+          console.log('asdasd');
+          Client.offSocket(ServerClientEvent.profile);
+          Client.offSocket(ServerClientEvent.loadCharacters);
+          Client.offSocket(ServerClientEvent.onLoadEnd);
+          game.state.start('Lobby');
+        });
+        console.log('asdasd')
+        Client.send(ClientServerEvent.init);
+      })
       /*var ch = new Character(AudioResource);
       game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR)
       .onDown.add(()=>{ch.attack();}, this);

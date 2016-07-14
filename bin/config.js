@@ -113,6 +113,9 @@ var Config = function() {
       FPS: 64,
       INTERVAL: 15.625,
       GameItemSize: 64,
+      HorizontalUnit: 32,
+      VerticakUnit: 8,
+      DepthUnit: 16,
       MinMoveSpd: 0.1,
       MinAtkSpd: 0.1,
       BaseBuildQuota: 5

@@ -22,7 +22,7 @@ CharacterController.prototype.leftKeyDown = function() {
   if(this.appendInput('l')) {
     charObj.requestMoveLeft();
     if(game.time.now - this.lastLeftKeyDown <= ArenaSettings.DOUBLE_KEYDOWN_THRESHOLD) {
-      charObj.run();
+      charObj.requestRun();
     }
   }
   this.lastLeftKeyDown = game.time.now;
@@ -38,7 +38,7 @@ CharacterController.prototype.rightKeyDown = function() {
   if(this.appendInput('r')) {
     charObj.requestMoveRight();
     if(game.time.now - this.lastRightKeyDown <= ArenaSettings.DOUBLE_KEYDOWN_THRESHOLD) {
-      charObj.run();
+      charObj.requestRun();
     }
   }
   this.lastRightKeyDown = game.time.now;

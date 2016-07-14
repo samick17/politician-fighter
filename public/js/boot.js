@@ -3,6 +3,11 @@ var Boot = function(game) {};
 var game;
 var gameWidth;
 var gameHeight;
+var gameMgr;
+var aoFactory;
+
+const AOFactory = new ArenaObjectFactory();
+const GameMgr = new GameManager(AOFactory);
 
 Boot.prototype = {
   preload: function() {

@@ -52,7 +52,7 @@ function initGameSocket(socket, roomMgr, client) {
   });
   //TODO broadcast room clients
   socket.emit(ServerClientEvent.profile, client.toJson());
-  socket.emit(ServerClientEvent.loadCharacters, {characters: CharacterLoader.characters, candidateCharacters: CharacterLoader.candidateCharacters});
+  socket.emit(ServerClientEvent.loadCharacters, {characters: CharacterLoader.characters});
   socket.emit(ServerClientEvent.onLoadEnd);
 }
 

@@ -1,5 +1,12 @@
 function WeaponProp(data, gameMgr) {
+  var weapon = this;
   BaseModel.call(this, data, true, false, gameMgr);
+  weapon.on(OpType.remove, function() {
+    if(weapon.isInit && weapon.attachement) {
+      var charSpr = weapon.attachement.spr;
+      charSpr.removeChild(weapon.spr, true);
+    }
+  });
 }
 Utils.inheritPrototype(WeaponProp, BaseModel);
 

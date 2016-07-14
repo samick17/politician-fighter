@@ -51,6 +51,7 @@ function GameRoom(params, roomMgr) {
   room.posSlots = new PositionSlots(room.maxMember);
   room.on(GameRoomEvent.ensureSelectCharacter, function(gameClient) {
     room.broadcast(ServerClientEvent.ensureSelectCharacter, {client: room.clientToJson(gameClient)});
+    //TODO uncomment
     if(room.isReady()) {
       room.gameStart();
     }
@@ -92,7 +93,7 @@ GameRoom.prototype.removeClient = function(client) {
 
 GameRoom.prototype.getClientSlotIndex = function(client) {
   return this.posSlots.getItemKey(client);
-}
+};
 
 GameRoom.prototype.broadcast = function(name, pkg) {
   for(var i in this.clients) {
@@ -109,7 +110,10 @@ GameRoom.prototype.breakup = function() {
 };
 
 GameRoom.prototype.isFull = function() {
-  return Object.keys(this.clients).length >= this.maxMember;
+  if(this.isGameStart)
+    return true;
+  else
+    return Object.keys(this.clients).length >= this.maxMember;
 };
 
 GameRoom.prototype.clientsToJsonArray = function() {
@@ -128,10 +132,16 @@ GameRoom.prototype.clientToJson = function(client) {
 };
 
 GameRoom.prototype.gameStart = function() {
-  var room = this;
-  room.broadcast(ServerClientEvent.gameStart, {});
-  room.arena = new Arena(room);
-  room.arena.gameStart();
+  if(!this.isGameStart) {
+    var room = this;
+    var countDownTime = 1;
+    room.broadcast(ServerClientEvent.gameStart, {countDownTime: countDownTime});
+    setTimeout(function() {
+      room.arena = new Arena(room);
+      room.arena.gameStart();
+      room.isGameStart = true;
+    }, countDownTime*1000);
+  }
 };
 
 GameRoom.prototype.toJson = function() {

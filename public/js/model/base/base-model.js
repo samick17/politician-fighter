@@ -6,6 +6,7 @@ function BaseModel(data, immovable, isTrigger, gameMgr) {
   this.gameMgr = gameMgr;
   this.isInit = false;
   this.isAlive = true;
+  this.coord = data.coord || new Vector(0, 0, 0);
 }
 Utils.inheritPrototype(BaseModel, IEventable);
 
@@ -23,7 +24,7 @@ BaseModel.prototype.init = function(attachement, pivot) {
       //TODO imp height coord
       var gamePos = this.gameMgr.coordToGamePos(this.coord);
       this.spr.x = gamePos.x;
-      this.spr.y = gamePos.z;
+      this.spr.y = gamePos.y;
       game.physics.enable(this.spr, Phaser.Physics.ARCADE);
       this.spr.body.immovable = this.immovable;
     }
@@ -74,6 +75,7 @@ BaseModel.prototype.destroy = function() {
   if(this.spr) {
     this.spr.destroy(true);
     this.spr = null;
+    this.trigger(OpType.remove);
   }
 };
 

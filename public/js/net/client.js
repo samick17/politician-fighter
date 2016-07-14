@@ -1,13 +1,18 @@
 function ClientModel() {
   IEventable.call(this);
-  this.socket = io('');
   var client = this;
-  this.socket.on('connect', function() {
-  });
-  this.socket.on('disconnect', function(){
-  });
 }
 Utils.inheritPrototype(ClientModel, IEventable);
+
+ClientModel.prototype.connect = function(callback) {
+  var client = this;
+  client.socket = io('');
+  client.socket.on('connect', function() {
+    callback();
+  });
+  client.socket.on('disconnect', function(){
+  });
+};
 
 ClientModel.prototype.send = function(name, pkg) {
   this.socket.emit(name, pkg);

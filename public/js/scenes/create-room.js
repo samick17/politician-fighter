@@ -6,7 +6,7 @@ var CreateRoom = function(game) {};
   const MENU_PLAYER_TEXT = '玩家';
   const MENU_START_TEXT = '創建房間';
   const Maps = [{id: 0, name: 'Foreast'}, {id: 1, name: 'Dugeon'}, {id: 2, name: 'Dessert'}];
-  const MemberCounts = [2,3,4,5,6];
+  const MemberCounts = [1,2,3,4,5,6];
   var menu = [];
   var selectedMenuIndex = 0;
   var highLightGroup;

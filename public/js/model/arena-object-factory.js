@@ -1,5 +1,4 @@
-function ArenaObjectFactory(game) {
-  this.game = game;
+function ArenaObjectFactory() {
 }
 
 ArenaObjectFactory.prototype.createObjectManager = function() {
@@ -31,7 +30,6 @@ const SkillData = {
 };
 
 ArenaObjectFactory.prototype.createBullet = function(coord, skillName) {
-  var game = this.game;
   var bulletData = Utils.clone(SkillData[skillName]);
   bulletData.id = Utils.generateGUID();
   bulletData.coord = coord;
@@ -40,16 +38,8 @@ ArenaObjectFactory.prototype.createBullet = function(coord, skillName) {
   return bullet;
 };
 
-ArenaObjectFactory.prototype.createCharacter = function(gameMgr, x, baseLine, characterResName) {
-  var charX = x;
-  var charY = baseLine*ArenaSettings.BaseLineHeight;
-  var data = Client.characters[characterResName];
-  data.coord = new Vector(5,0,58);
-  var character = new Character(data, AudioResource, baseLine, gameMgr);
-  character.init();
-  var lifeBar = this.createLifeBar();
-  lifeBar.attach(character);
-  return character;
+ArenaObjectFactory.prototype.createCharacter = function(gameMgr, data) {
+  return new Character(data, gameMgr);
 };
 
 ArenaObjectFactory.prototype.createChatBoxGroup = function(charObj, content) {

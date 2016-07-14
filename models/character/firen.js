@@ -1,8 +1,12 @@
+const GameCharacter = require('../base/game-character');
+const Weapons = require('../game-data/weapons');
+
 module.exports = {
   name: 'firen',
   spriteSheetName: 'firen',
-  path: 'media/arena/freeze.png',
-  avatarPath: 'media/arena/character/kp/kp.png',
+  path: 'media/arena/firen.png',
+  moveSpd: 1,
+  runSpd: 4,
   width: 80,
   height: 80,
   framesCount: 140,
@@ -20,6 +24,9 @@ module.exports = {
     {name: 'thresh', frames: [58,59,69], fps: 10, repeat: true},
     {name: 'defense', frames: [56], fps: 10, repeat: false},
     {name: 'lie', frames: [35,34], fps: 10, repeat: false},
+    {name: 'recovery', frames: [34,35], fps: 10, repeat: false},
     {name: 'weaponAttack', frames: [70,72,73,72,70], fps: 10, repeat: false}
-  ]
+  ],
+  prototype: GameCharacter,
+  weapon: Weapons.baseSword
 };

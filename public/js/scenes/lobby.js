@@ -3,9 +3,9 @@ var Lobby = function(game) {};
 (function() {
 
   var menuModel = [
-  {id: 0, name: '創建房間', onMenuSelect: () => {game.state.start('CreateRoom');}},
-  {id: 1, name: '快速加入', onMenuSelect: () => {Client.send(ClientServerEvent.quickJoin)}},
-  {id: 2, name: '按鍵設定', onMenuSelect: () => {console.log('keyboard settings');}}
+    {id: 0, name: '創建房間', onMenuSelect: () => {game.state.start('CreateRoom');}},
+    {id: 1, name: '快速加入', onMenuSelect: () => {Client.send(ClientServerEvent.quickJoin)}},
+    {id: 2, name: '按鍵設定', onMenuSelect: () => {console.log('keyboard settings');}}
   ];
 
   function registerLobbySocketListener() {

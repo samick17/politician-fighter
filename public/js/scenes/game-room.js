@@ -55,7 +55,13 @@ var GameRoom = function(game) {};
       memberSlots[clientData.slotIndex].selectCharacter();
     });
     Client.listen(ServerClientEvent.gameStart, (data) => {
-      countDownAndStartGame(3);
+      countDownAndStartGame(data.countDownTime);
+    });
+    Client.listen(ServerClientEvent.loadAllPlayers, function(data) {
+      GameMgr.loadAllPlayers(data.players);
+    });
+    Client.listen(ServerClientEvent.setPlayer, function(data) {
+      GameMgr.setPlayer(data.id);
     });
   }
 
@@ -103,6 +109,8 @@ var GameRoom = function(game) {};
     else if(this.client) {
       this.removeCharacter();
       this.clientSpr = game.add.image(0, 0, Client.characters[Object.keys(Client.characters)[this.client.characterIndex]].name);
+      this.clientSpr.width = CHARACTER_BLOCK_CONTENT_WIDTH;
+      this.clientSpr.height = CHARACTER_BLOCK_CONTENT_HEIGHT;
       this.spr.add(this.clientSpr);
     }
   };
@@ -181,9 +189,10 @@ var GameRoom = function(game) {};
     preload: function() {
       registerGameRoomSocketListener();
       var candidateCharacters = Client.characters;
-      for(var i in candidateCharacters) {
-        var cch = candidateCharacters[i];
-        game.load.image(cch.name, cch.avatarPath);
+      var candidateCharactersKeys = Object.keys(candidateCharacters);
+      //load avatar
+      for(var name in candidateCharacters) {
+        game.load.image(name, '/media/arena/character/{0}/avatar.bmp'.format(name));
       }
       game.load.image('highlight', '/media/arena/character/character-highlight.png');
       game.load.image('select-character', '/media/select_character.png');
